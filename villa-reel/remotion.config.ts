@@ -11,3 +11,10 @@ Config.setRspack(true);
 Config.setVideoImageFormat("jpeg");
 Config.setOverwriteOutput(true);
 Config.setDefaultPremountInSeconds(2);
+
+// Cloud sandbox: remotion.media is unreachable, use the preinstalled headless shell.
+// Override with REMOTION_BROWSER_EXECUTABLE (or remove) on machines that can download Chrome.
+const browser = process.env.REMOTION_BROWSER_EXECUTABLE;
+if (browser) {
+  Config.setBrowserExecutable(browser);
+}
