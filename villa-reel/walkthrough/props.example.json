@@ -1,0 +1,72 @@
+{
+  "mode": "draft",
+  "title": "Villa in Kargıcak",
+  "introSec": 2,
+  "endCardSec": 3,
+  "showRoomLabels": true,
+  "showCaptions": false,
+  "rights": {
+    "ownerApproval": false,
+    "imageRightsCleared": false,
+    "privacyChecked": false
+  },
+  "rooms": [
+    {
+      "id": "wohnzimmer",
+      "name": "Wohnbereich",
+      "method": "recorded",
+      "source": { "src": "walkthrough/test/04-wohnzimmer.mp4", "projection": "flat" },
+      "durationSec": 4,
+      "exit": { "description": "Durchgang zur Küche" },
+      "transitionToNext": { "type": "slide", "durationSec": 0.6 },
+      "verification": "pending"
+    },
+    {
+      "id": "kueche",
+      "name": "Küche",
+      "method": "recorded",
+      "source": { "src": "walkthrough/test/05-kueche.mp4", "projection": "flat" },
+      "durationSec": 4,
+      "trimStartSec": 1,
+      "transitionToNext": { "type": "fade", "durationSec": 0.6 },
+      "verification": "pending"
+    },
+    {
+      "id": "treppe",
+      "name": "Marmortreppe",
+      "method": "recorded",
+      "source": { "src": "walkthrough/test/06-treppe.mp4", "projection": "flat" },
+      "durationSec": 3,
+      "playbackRate": 1.5,
+      "transitionToNext": { "type": "cut" },
+      "verification": "pending"
+    },
+    {
+      "id": "schlafzimmer",
+      "name": "Hauptschlafzimmer",
+      "method": "recorded",
+      "source": { "src": "walkthrough/test/07-hauptschlafzimmer.mp4", "projection": "flat" },
+      "durationSec": 4,
+      "transitionToNext": { "type": "wipe", "durationSec": 0.5 },
+      "verification": "pending"
+    },
+    {
+      "id": "badezimmer",
+      "name": "Badezimmer",
+      "method": "recorded",
+      "source": { "src": "walkthrough/test/09-bad.mp4", "projection": "flat" },
+      "durationSec": 3.5,
+      "focus": { "horizontal": { "x": 0.4, "y": 0.5 } },
+      "verification": "pending"
+    },
+    {
+      "id": "terrasse",
+      "name": "Terrasse & Pool",
+      "method": "recorded",
+      "source": { "src": "walkthrough/test/02-terrasse-pool.mp4", "projection": "flat" },
+      "durationSec": 4.5,
+      "focus": { "vertical": { "x": 0.62, "y": 0.5 } },
+      "verification": "pending"
+    }
+  ]
+}
