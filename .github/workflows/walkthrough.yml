@@ -1,0 +1,65 @@
+name: Walkthrough checks
+
+on:
+  pull_request:
+    paths:
+      - 'villa-reel/**'
+      - '.github/workflows/walkthrough.yml'
+  push:
+    branches:
+      - 'claude/exciting-keller-l2a4zy'
+    paths:
+      - 'villa-reel/**'
+      - '.github/workflows/walkthrough.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: walkthrough-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: villa-reel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: villa-reel/package-lock.json
+      - name: Install FFmpeg
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - run: npm ci --ignore-scripts
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - run: npx remotion browser ensure
+      - name: Generate synthetic clips and tones
+        run: node walkthrough/tools/smoke-fixtures.mjs
+      - name: Render both formats with media checks
+        run: |
+          npm run render:walkthrough -- Walkthrough-9x16 out/smoke-9x16.mp4 --props=out/smoke-props.json --concurrency=2
+          npm run render:walkthrough -- Walkthrough-16x9 out/smoke-16x9.mp4 --props=out/smoke-props.json --concurrency=2
+      - name: Verify dimensions, frame count and audio
+        run: |
+          python3 - <<'PY'
+          import json, subprocess
+          for name, width, height in [('9x16',1080,1920),('16x9',1920,1080)]:
+              data=json.loads(subprocess.check_output(['ffprobe','-v','error','-show_streams','-of','json',f'out/smoke-{name}.mp4']))
+              video=next(s for s in data['streams'] if s['codec_type']=='video')
+              assert (video['width'],video['height']) == (width,height), video
+              assert video['r_frame_rate']=='30/1', video
+              assert int(video['nb_frames'])==234, video
+              assert any(s['codec_type']=='audio' for s in data['streams']), data
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-walkthrough-renders
+          path: villa-reel/out/smoke-*.mp4
+          retention-days: 7

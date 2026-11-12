@@ -12,6 +12,7 @@ import { TransitionSeries, linearTiming } from "@remotion/transitions";
 import { fontFamily } from "../font";
 import { buildTimeline, secToFrames } from "./scenes.ts";
 import { presentationFor } from "./transitions.ts";
+import { labelOpacity as getLabelOpacity } from "./opacity.ts";
 import type { WalkthroughProps, WalkthroughRoom } from "./types.ts";
 
 const GOLD = "#e6cb91";
@@ -63,12 +64,7 @@ const RoomClip: React.FC<{ room: WalkthroughRoom; props: WalkthroughProps }> = (
     x: 0.5,
     y: 0.5,
   };
-  const labelOpacity = interpolate(
-    frame,
-    [8, 24, durationInFrames - 30, durationInFrames - 14],
-    [0, 1, 1, 0],
-    { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
-  );
+  const labelOpacity = getLabelOpacity(frame, durationInFrames);
   const caption = props.showCaptions ? room.voiceover?.text : undefined;
 
   return (

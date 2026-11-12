@@ -20,7 +20,8 @@ const fail = (message) => {
 };
 
 const run = (bin, args, options = {}) => {
-  const result = spawnSync(bin, args, { encoding: "utf8", ...options });
+  const safeArgs = bin === "ffmpeg" ? ["-nostdin", "-n", ...args] : args;
+  const result = spawnSync(bin, safeArgs, { encoding: "utf8", ...options });
   if (result.error) fail(`${bin} nicht ausführbar: ${result.error.message}`);
   if (result.status !== 0) fail(`${bin} fehlgeschlagen:\n${result.stderr?.slice(-1500)}`);
   return result.stdout;

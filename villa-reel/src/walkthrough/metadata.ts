@@ -25,12 +25,12 @@ export const walkthroughMetadata =
   ): CalculateMetadataFunction<WalkthroughProps> =>
   ({ props }) => {
     const merged: WalkthroughProps = { ...EMPTY_WALKTHROUGH, ...props, orientation };
+    for (const issue of assertValidWalkthrough(merged, { allowEmptyDraft: true })) {
+      console.warn(`Walkthrough: ${issue.path}: ${issue.message}`);
+    }
     if (merged.rooms.length === 0) {
       // Placeholder card only; nothing publishable is rendered.
       return { durationInFrames: 3 * FPS, fps: FPS, props: merged };
-    }
-    for (const issue of assertValidWalkthrough(merged)) {
-      console.warn(`Walkthrough: ${issue.path}: ${issue.message}`);
     }
     return {
       durationInFrames: buildTimeline(merged).totalFrames,

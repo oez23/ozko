@@ -3,6 +3,7 @@
 import { buildTimeline, secToFrames } from "./scenes.ts";
 import {
   METHODS_FROM_3D,
+  DEFAULT_TRANSITION,
   TRANSITION_TYPES,
   WALKTHROUGH_METHODS,
   type WalkthroughProps,
@@ -43,6 +44,12 @@ export const checkMediaPath = (
 
 const isNum = (v: unknown): v is number =>
   typeof v === "number" && Number.isFinite(v);
+const isRecord = (v: unknown): v is Record<string, unknown> =>
+  typeof v === "object" && v !== null && !Array.isArray(v);
+const hasText = (v: unknown): v is string =>
+  typeof v === "string" && v.trim().length > 0;
+
+export type ValidationOptions = { allowEmptyDraft?: boolean };
 
 const validateRoom = (
   room: WalkthroughRoom,
@@ -53,10 +60,10 @@ const validateRoom = (
   const err = (field: string, message: string) =>
     issues.push({ level: "error", path: `${path}.${field}`, message });
 
-  if (!/^[a-z0-9][a-z0-9-]*$/.test(room.id ?? "")) {
+  if (typeof room.id !== "string" || !/^[a-z0-9][a-z0-9-]*$/.test(room.id)) {
     err("id", "nur Kleinbuchstaben, Ziffern und Bindestriche");
   }
-  if (!room.name?.trim()) err("name", "fehlt");
+  if (!hasText(room.name)) err("name", "muss ein nichtleerer Text sein");
   if (!WALKTHROUGH_METHODS.includes(room.method)) {
     err("method", `unbekannt: ${String(room.method)}`);
   }
@@ -84,8 +91,20 @@ const validateRoom = (
   ) {
     err("playbackRate", "muss zwischen 0,25 und 4 liegen");
   }
-  if (room.transitionToNext && !TRANSITION_TYPES.includes(room.transitionToNext.type)) {
-    err("transitionToNext.type", `unbekannt: ${String(room.transitionToNext.type)}`);
+  if (room.transitionToNext !== undefined) {
+    if (!isRecord(room.transitionToNext)) {
+      err("transitionToNext", "muss ein Objekt sein");
+    } else {
+      const t = room.transitionToNext;
+      if (!TRANSITION_TYPES.includes(t.type)) {
+        err("transitionToNext.type", `unbekannt: ${String(t.type)}`);
+      }
+      if (t.durationSec !== undefined && (!isNum(t.durationSec) || t.durationSec < 0)) {
+        err("transitionToNext.durationSec", "muss eine endliche, nichtnegative Zahl sein");
+      } else if (t.type !== "cut" && secToFrames(t.durationSec ?? DEFAULT_TRANSITION.durationSec) < 1) {
+        err("transitionToNext.durationSec", "muss nach Rundung mindestens einen Frame ergeben");
+      }
+    }
   }
   for (const key of ["vertical", "horizontal"] as const) {
     const f = room.focus?.[key];
@@ -97,6 +116,9 @@ const validateRoom = (
     const p = checkMediaPath(room.voiceover.audioSrc, AUDIO_EXT);
     if (p) err("voiceover.audioSrc", p);
   }
+  if (room.voiceover !== undefined && (!isRecord(room.voiceover) || !hasText(room.voiceover.text))) {
+    err("voiceover", "muss ein Objekt mit nichtleerem Sprechertext sein");
+  }
 
   if (!["pending", "verified", "rejected"].includes(room.verification)) {
     err("verification", "muss pending, verified oder rejected sein");
@@ -106,7 +128,7 @@ const validateRoom = (
   }
 
   // No 3D export without naming where it comes from.
-  if (METHODS_FROM_3D.includes(room.method) && !room.sourceReference?.trim()) {
+  if (METHODS_FROM_3D.includes(room.method) && !hasText(room.sourceReference)) {
     err("sourceReference", "3D-Export ohne Quellenangabe (Tour-ID, Projekt oder Datei)");
   }
 
@@ -115,7 +137,7 @@ const validateRoom = (
     if (!ai) {
       err("ai", "KI-Clip ohne Herkunftsangaben");
     } else {
-      if (!ai.provider?.trim()) err("ai.provider", "fehlt");
+      if (!hasText(ai.provider)) err("ai.provider", "muss ein nichtleerer Text sein");
       const start = checkMediaPath(ai.startFrame, IMAGE_EXT, ["walkthrough/", "photos/"]);
       if (start) err("ai.startFrame", start);
       if (ai.endFrame !== undefined) {
@@ -134,10 +156,17 @@ const validateRoom = (
   }
 };
 
-export const validateWalkthrough = (props: WalkthroughProps): Issue[] => {
+export const validateWalkthrough = (
+  props: WalkthroughProps,
+  options: ValidationOptions = {},
+): Issue[] => {
   const issues: Issue[] = [];
   const err = (path: string, message: string) =>
     issues.push({ level: "error", path, message });
+  if (!isRecord(props)) {
+    err("props", "muss ein Objekt sein");
+    return issues;
+  }
   const final = props.mode === "final";
 
   if (props.orientation !== "vertical" && props.orientation !== "horizontal") {
@@ -146,24 +175,44 @@ export const validateWalkthrough = (props: WalkthroughProps): Issue[] => {
   if (props.mode !== "draft" && props.mode !== "final") {
     err("mode", "muss draft oder final sein");
   }
-  if (!props.title?.trim()) err("title", "fehlt");
+  if (!hasText(props.title)) err("title", "muss ein nichtleerer Text sein");
+  if (props.subtitle !== undefined && typeof props.subtitle !== "string") {
+    err("subtitle", "muss ein Text sein");
+  }
+  for (const key of ["showRoomLabels", "showCaptions"] as const) {
+    if (typeof props[key] !== "boolean") err(key, "muss true oder false sein");
+  }
   for (const key of ["introSec", "endCardSec"] as const) {
     if (!isNum(props[key]) || props[key] < 0 || props[key] > 15) {
       err(key, "muss zwischen 0 und 15 Sekunden liegen");
+    } else if (props[key] > 0 && secToFrames(props[key]) < 1) {
+      err(key, "muss 0 oder mindestens einen Frame lang sein");
     }
   }
-  if (props.music) {
+  if (props.music !== undefined && !isRecord(props.music)) {
+    err("music", "muss ein Objekt sein");
+  } else if (props.music) {
     const p = checkMediaPath(props.music.src, AUDIO_EXT);
     if (p) err("music.src", p);
+    const volume = props.music.volume;
+    if (volume !== undefined && (!isNum(volume) || volume < 0 || volume > 1)) {
+      err("music.volume", "muss zwischen 0 und 1 liegen");
+    }
   }
 
   if (!Array.isArray(props.rooms) || props.rooms.length === 0) {
-    err("rooms", "mindestens ein Raum nötig");
+    if (!(Array.isArray(props.rooms) && props.rooms.length === 0 && props.mode === "draft" && options.allowEmptyDraft)) {
+      err("rooms", "mindestens ein Raum nötig");
+    }
     return issues;
   }
   const seen = new Set<string>();
   props.rooms.forEach((room, i) => {
     const path = `rooms[${i}]`;
+    if (!isRecord(room)) {
+      err(path, "muss ein Raum-Objekt sein");
+      return;
+    }
     if (seen.has(room.id)) err(`${path}.id`, `doppelt: ${room.id}`);
     seen.add(room.id);
     validateRoom(room, path, final, issues);
@@ -206,8 +255,11 @@ export const validateWalkthrough = (props: WalkthroughProps): Issue[] => {
 };
 
 /** Throws with a readable list when there are errors. Used by calculateMetadata. */
-export const assertValidWalkthrough = (props: WalkthroughProps): Issue[] => {
-  const issues = validateWalkthrough(props);
+export const assertValidWalkthrough = (
+  props: WalkthroughProps,
+  options: ValidationOptions = {},
+): Issue[] => {
+  const issues = validateWalkthrough(props, options);
   const errors = issues.filter((i) => i.level === "error");
   if (errors.length > 0) {
     throw new Error(
