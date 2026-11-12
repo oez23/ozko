@@ -38,3 +38,6 @@ In Umgebungen ohne Chrome-Download: `REMOTION_BROWSER_EXECUTABLE=/pfad/zu/chrome
 ## Lizenzen
 Schrift: Cormorant Garamond (SIL Open Font License), lokal in `public/fonts/`.
 Remotion: frei für Teams bis 3 Personen, sonst Firmenlizenz nötig (remotion.pro/license).
+
+## Walkthroughs
+Rundgänge aus Videoclips pro Raum (`Walkthrough-9x16`, `Walkthrough-16x9`): siehe `walkthrough/README.md`.
