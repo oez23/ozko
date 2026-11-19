@@ -1,1 +1,9 @@
 fotos/fotos-optimiert.zip
+
+# selfhost: lokale Secrets und Daten nie committen
+selfhost/**/.env
+selfhost/immich/library/
+selfhost/immich/postgres/
+selfhost/jellyfin/config/
+selfhost/jellyfin/cache/
+selfhost/postiz/docker-compose.override.yaml

@@ -1,0 +1,18 @@
+{
+  "extraKnownMarketplaces": {
+    "founder-skill": {
+      "source": { "source": "github", "repo": "Jakeschincariol/founder-skill" }
+    },
+    "marketingskills": {
+      "source": { "source": "github", "repo": "coreyhaines31/marketingskills" }
+    },
+    "hallmark": {
+      "source": { "source": "github", "repo": "Nutlope/hallmark" }
+    }
+  },
+  "enabledPlugins": {
+    "founder-skill@founder-skill": true,
+    "marketing-skills@marketingskills": true,
+    "hallmark@hallmark": true
+  }
+}

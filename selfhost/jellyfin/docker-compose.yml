@@ -1,0 +1,19 @@
+# Nach der offiziellen Anleitung: https://jellyfin.org/docs/general/installation/container
+name: jellyfin
+
+services:
+  jellyfin:
+    image: jellyfin/jellyfin:${JELLYFIN_VERSION:-latest}
+    container_name: jellyfin
+    # Als normaler Benutzer laufen lassen, nicht als root (Werte: `id -u` / `id -g`)
+    user: ${PUID:-1000}:${PGID:-1000}
+    ports:
+      - '8096:8096/tcp'
+      # Automatische Erkennung im lokalen Netz
+      - '7359:7359/udp'
+    volumes:
+      - ${CONFIG_LOCATION:-./config}:/config
+      - ${CACHE_LOCATION:-./cache}:/cache
+      # Medien nur lesend einbinden
+      - ${MEDIA_LOCATION}:/media:ro
+    restart: unless-stopped

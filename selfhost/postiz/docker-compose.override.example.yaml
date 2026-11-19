@@ -1,0 +1,26 @@
+# Kopieren nach docker-compose.override.yaml (ist per .gitignore ausgeschlossen).
+# Docker Compose legt diese Werte automatisch über die offizielle docker-compose.yaml,
+# so bleiben Secrets aus der versionierten Datei heraus.
+services:
+  postiz:
+    environment:
+      # Mit `openssl rand -base64 48` erzeugen
+      JWT_SECRET: 'CHANGE_ME'
+
+      # Bei Betrieb unter einer eigenen Domain alle drei Adressen anpassen
+      MAIN_URL: 'http://localhost:4007'
+      FRONTEND_URL: 'http://localhost:4007'
+      NEXT_PUBLIC_BACKEND_URL: 'http://localhost:4007/api'
+
+      # Nach dem Anlegen des eigenen Kontos auf 'true' setzen
+      DISABLE_REGISTRATION: 'false'
+
+      # Nur die Netzwerke eintragen, die wirklich genutzt werden.
+      # Jedes braucht eine eigene Entwickler-App beim Anbieter:
+      # https://docs.postiz.com/providers
+      # FACEBOOK_APP_ID: ''
+      # FACEBOOK_APP_SECRET: ''
+      # TIKTOK_CLIENT_ID: ''
+      # TIKTOK_CLIENT_SECRET: ''
+      # YOUTUBE_CLIENT_ID: ''
+      # YOUTUBE_CLIENT_SECRET: ''

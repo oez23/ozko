@@ -1,0 +1,10 @@
+# In den geklonten Ordner AppFlowy-Cloud kopieren (neben docker-compose.yml).
+#
+# Grund: Die offizielle Compose-Datei (Stand c5bcfd3, 2026-09-11) verweist auf das Image
+# `minio/minio`, das es auf Docker Hub nicht mehr gibt – `docker compose up` bricht damit ab.
+# Dieses Override ersetzt es durch den Community-Build, den auch Cap in seiner offiziellen
+# Compose-Datei verwendet. Es ist kein Image des MinIO-Herstellers; wer das nicht möchte,
+# stellt AppFlowy stattdessen auf einen externen S3-Speicher um (APPFLOWY_S3_USE_MINIO=false).
+services:
+  minio:
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
