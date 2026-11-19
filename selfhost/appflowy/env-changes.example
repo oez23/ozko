@@ -1,0 +1,15 @@
+# Diese Werte in der aus deploy.env kopierten .env setzen bzw. ergänzen.
+
+# Adresse, unter der AppFlowy erreichbar ist (mit Port, wenn nicht 80/443)
+FQDN=localhost:8090
+NGINX_PORT=8090
+NGINX_TLS_PORT=8443
+
+# Standardwerte der Vorlage ersetzen – jeweils `openssl rand -hex 32`
+POSTGRES_PASSWORD=CHANGE_ME
+GOTRUE_JWT_SECRET=CHANGE_ME
+AWS_SECRET=CHANGE_ME
+
+# Erstes Admin-Konto
+GOTRUE_ADMIN_EMAIL=CHANGE_ME
+GOTRUE_ADMIN_PASSWORD=CHANGE_ME

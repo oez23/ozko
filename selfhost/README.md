@@ -13,7 +13,10 @@ mit Docker und Docker Compose.
 | Postiz | Social-Media-Planung | `postiz/` – offizielle Compose-Datei |
 | OpenSEO | SEO-Analyse (Keywords, Rankings, Backlinks) | `open-seo/` – offizielle Compose-Datei |
 | Inbox Zero | KI-Assistent für das E-Mail-Postfach | `inbox-zero/` – offizielle Compose-Datei |
-| AppFlowy, Cal.com, OpenProject, Cap, Chatwoot | siehe Abschnitt „Weitere Dienste“ | Start direkt aus dem offiziellen Repository |
+| Chatwoot | Kunden-Chat und Support-Postfach | `chatwoot/` – offizielle Compose-Datei, **Start getestet** |
+| AppFlowy | Notizen, Datenbanken, Projektboards | `appflowy/` – Zusatzdateien zum offiziellen Repository, teilweise getestet |
+| Cap | Bildschirmaufnahmen teilen | `cap/` – `.env`-Vorlage zum offiziellen Repository, ungetestet |
+| Cal.com, OpenProject | siehe Abschnitt „Weitere Dienste“ | Start direkt aus dem offiziellen Repository |
 | OpenWhispr, VoiceStudio | Diktat / Sprachsynthese | Desktop-Apps – siehe unten |
 | CrowdSec | Angriffserkennung und IP-Sperren | nativ auf dem Host – siehe unten |
 | Anytype | Notizen / Wissensbasis | Desktop-App, kein Server nötig – siehe unten |
@@ -23,6 +26,116 @@ mit Docker und Docker Compose.
 Die Compose-Dateien für Immich, Twenty, Documenso, Postiz, Inbox Zero und OpenSEO sind unverändert von den Projekten übernommen
 (Stand 2026-11-19); für Updates die Datei neu von der Quelle laden, nicht von Hand
 anpassen. Jellyfin liefert keine fertige Datei – die hier folgt der offiziellen Anleitung.
+
+## Erste Ausbaustufe: Chatwoot, AppFlowy, Cap
+
+Ports, wenn alle drei auf demselben Rechner laufen:
+
+| Dienst | Adresse | Weitere Host-Ports |
+|---|---|---|
+| Chatwoot | <http://localhost:3000> | 5432 (Postgres) und 6379 (Redis), nur lokal gebunden |
+| AppFlowy | <http://localhost:8090> | 8443 (TLS) |
+| Cap | <http://localhost:3020> | 9010 (Speicher) und 9011 (Speicher-Konsole) |
+
+### Chatwoot
+
+Quelle: <https://github.com/chatwoot/chatwoot> (`docker-compose.production.yaml`, `.env.example`)
+
+```bash
+cd selfhost/chatwoot
+cp .env.example .env
+```
+
+In `.env` die drei `CHANGE_ME`-Werte ersetzen: `SECRET_KEY_BASE` (Ausgabe von
+`openssl rand -hex 64`), `POSTGRES_PASSWORD` und `REDIS_PASSWORD` (je `openssl rand -hex 16`).
+Für den Betrieb unter einer Domain zusätzlich `FRONTEND_URL` anpassen.
+
+```bash
+docker compose run --rm rails bundle exec rails db:chatwoot_prepare
+```
+
+```bash
+docker compose up -d
+```
+
+Danach <http://localhost:3000> öffnen und das Admin-Konto anlegen. Ohne SMTP-Einstellungen in
+`.env` verschickt Chatwoot keine E-Mails (Einladungen, Passwort-Reset).
+
+Getestet am 2026-11-19 mit Chatwoot 4.20.0: Datenbank vorbereitet, alle vier Container
+liefen, `/api` meldete `queue_services: ok` und `data_services: ok`. Nicht getestet:
+Anmeldung, E-Mail-Versand, Kanäle.
+
+Abweichung von der offiziellen Datei: `POSTGRES_PASSWORD` wird aus der `.env` gelesen statt
+leer in der Compose-Datei zu stehen.
+
+### AppFlowy
+
+Quelle: <https://github.com/AppFlowy-IO/AppFlowy-Cloud>. Das Repository wird geklont, weil
+die Compose-Datei eine Nginx-Konfiguration und Zertifikate aus dem Repository einbindet.
+
+```bash
+git clone https://github.com/AppFlowy-IO/AppFlowy-Cloud
+```
+
+```bash
+cp selfhost/appflowy/docker-compose.override.yml AppFlowy-Cloud/
+```
+
+```bash
+cd AppFlowy-Cloud && cp deploy.env .env
+```
+
+In `.env` die Werte aus `selfhost/appflowy/env-changes.example` setzen, dann:
+
+```bash
+docker compose up -d
+```
+
+Zwei Dinge, die der Test am 2026-11-19 gezeigt hat (Repository-Stand `c5bcfd3`):
+
+- **Ohne das Override startet der Stack nicht.** Die offizielle Datei verweist auf das Image
+  `minio/minio`, das auf Docker Hub nicht mehr existiert. Das Override ersetzt es durch einen
+  Community-Build (`pgsty/minio`), den auch Cap offiziell verwendet. Wer keinen Community-Build
+  für den Dateispeicher möchte, nutzt externen S3-Speicher.
+- **Der Server braucht IPv6 im Kernel.** `appflowy_cloud` und `appflowy_search` lauschen auf
+  `[::]`. In der Testumgebung ohne IPv6 brachen beide mit „Address family not supported" ab.
+  Auf einem normalen Linux-Server ist IPv6 vorhanden; in manchen Containern und
+  abgespeckten NAS-Systemen nicht.
+
+Gestartet und „healthy" waren im Test Postgres, Redis, GoTrue, Nginx und der Speicher. Der
+eigentliche AppFlowy-Dienst lief wegen des fehlenden IPv6 nicht – ein vollständiger Start ist
+also noch nicht nachgewiesen.
+
+AppFlowy deckt weitgehend denselben Zweck ab wie Anytype – eines von beiden genügt.
+
+### Cap
+
+Quelle: <https://github.com/CapSoftware/Cap>. Das Repository wird geklont, weil der
+Medienserver aus dem Quellcode gebaut wird.
+
+```bash
+git clone https://github.com/CapSoftware/Cap.git
+```
+
+```bash
+cp selfhost/cap/.env.example Cap/.env
+```
+
+In `Cap/.env` alle `CHANGE_ME`-Werte ersetzen.
+
+```bash
+cd Cap && docker compose up -d --build
+```
+
+Danach <http://localhost:3020> öffnen. Ohne konfigurierten E-Mail-Versand stehen die
+Login-Links in `docker compose logs cap-web`. Die Desktop-App wird unter „Cap Server URL" auf
+die eigene Instanz gestellt.
+
+Wichtig: Ohne `.env` verwendet die offizielle Compose-Datei fest eingetragene Standard-Secrets,
+die jeder im Quellcode nachlesen kann. Nie ohne eigene Werte starten.
+
+Nicht getestet: Das Image `ghcr.io/capsoftware/cap-web` ließ sich in der Testumgebung nicht
+laden, weil deren Netzwerkfreigabe den Host `pkg-containers.githubusercontent.com` sperrt.
 
 ## Immich
 
@@ -207,22 +320,6 @@ laufen, deshalb wird hier das offizielle Repository auf dem Server geklont statt
 in dieses Repo zu übernehmen. Die folgenden Abläufe sind aus den jeweiligen READMEs
 übernommen und hier nicht getestet.
 
-### AppFlowy (Notizen, Datenbanken, Projektboards)
-
-Quelle: <https://github.com/AppFlowy-IO/AppFlowy-Cloud>
-
-```bash
-git clone https://github.com/AppFlowy-IO/AppFlowy-Cloud
-```
-
-```bash
-cd AppFlowy-Cloud && cp deploy.env .env
-```
-
-`.env` anpassen (Passwörter, Domain), dann `docker compose up -d`. Der Stack umfasst rund
-zehn Container (u. a. Postgres, MinIO, Redis, GoTrue, Nginx) und belegt die Ports 80/443.
-AppFlowy deckt weitgehend denselben Zweck ab wie Anytype – eines von beiden genügt.
-
 ### Cal.com (Terminbuchung)
 
 Quelle: <https://github.com/calcom/docker>
@@ -254,42 +351,9 @@ In `.env` `SECRET_KEY_BASE` und das Datenbank-Passwort ersetzen, dann
 `docker compose up -d --build --pull always`. Erreichbar unter <http://localhost:8080>
 (nur lokal gebunden). Mindestens 4 GB RAM.
 
-### Cap (Bildschirmaufnahmen teilen)
-
-Quelle: <https://github.com/CapSoftware/Cap>
-
-```bash
-git clone https://github.com/CapSoftware/Cap.git
-```
-
-```bash
-cd Cap && docker compose up -d
-```
-
-Standardport 3000. Ohne konfigurierten E-Mail-Versand erscheinen die Login-Links in
-`docker compose logs cap-web`. Die Desktop-App wird unter „Cap Server URL" auf die eigene
-Instanz gestellt.
-
-### Chatwoot (Kunden-Chat und Support-Postfach)
-
-Quelle: <https://github.com/chatwoot/chatwoot> – die Dateien `.env.example` und
-`docker-compose.production.yaml` aus dem Repository laden, als `.env` und
-`docker-compose.yaml` ablegen, `SECRET_KEY_BASE`, `FRONTEND_URL` und die Passwörter für
-Postgres und Redis setzen. Vor dem ersten Start die Datenbank vorbereiten:
-
-```bash
-docker compose run --rm rails bundle exec rails db:chatwoot_prepare
-```
-
-```bash
-docker compose up -d
-```
-
-Standardport 3000, nur lokal gebunden.
-
 ### Portkonflikt
 
-Twenty, Cal.com, Cap und Chatwoot wollen alle Port 3000. Auf einem gemeinsamen Server muss
+Twenty, Cal.com und Chatwoot wollen alle Port 3000 (Cap ist in der Vorlage hier auf 3020 gelegt). Auf einem gemeinsamen Server muss
 jeder Dienst einen eigenen Host-Port bekommen (in der jeweiligen `.env` bzw. Compose-Datei)
 oder hinter einem Reverse-Proxy mit eigener Subdomain laufen.
 
@@ -387,6 +451,10 @@ Whiteboard Teil eines eigenen Produkts werden soll.
 
 ## Prüfstand
 
-Die sieben Compose-Dateien in diesem Repo wurden mit `docker compose config` syntaktisch validiert.
-Ein echter Start (`docker compose up`) wurde nicht getestet, weil in der
-Entwicklungsumgebung kein Docker-Daemon lief.
+| Dienst | Geprüft am 2026-11-19 |
+|---|---|
+| Chatwoot | echter Start, API antwortet |
+| AppFlowy | Teilstart; Hauptdienst scheiterte am fehlenden IPv6 der Testumgebung |
+| Cap | nicht startbar in der Testumgebung (Image-Host gesperrt) |
+| Immich, Twenty, Jellyfin, Documenso, Postiz, Inbox Zero, OpenSEO | nur Syntax (`docker compose config`), kein Start |
+| Cal.com, OpenProject | ungeprüft, Ablauf aus den READMEs der Projekte |
