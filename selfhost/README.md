@@ -12,6 +12,8 @@ mit Docker und Docker Compose.
 | Documenso | Dokumente digital signieren | `documenso/` – offizielle Compose-Datei |
 | Postiz | Social-Media-Planung | `postiz/` – offizielle Compose-Datei |
 | Inbox Zero | KI-Assistent für das E-Mail-Postfach | `inbox-zero/` – offizielle Compose-Datei |
+| AppFlowy, Cal.com, OpenProject, Cap, Chatwoot | siehe Abschnitt „Weitere Dienste“ | Start direkt aus dem offiziellen Repository |
+| OpenWhispr, VoiceStudio | Diktat / Sprachsynthese | Desktop-Apps – siehe unten |
 | CrowdSec | Angriffserkennung und IP-Sperren | nativ auf dem Host – siehe unten |
 | Anytype | Notizen / Wissensbasis | Desktop-App, kein Server nötig – siehe unten |
 | Papermark | Dokumente teilen mit Tracking | kein Compose – siehe unten |
@@ -171,6 +173,109 @@ Zu beachten – dieser Dienst hat die höchste Einstiegshürde und das höchste 
 - Der Dienst kann E-Mails senden, archivieren und löschen. Automatische Regeln zuerst im
   Entwurfs- bzw. Testmodus prüfen.
 
+## Weitere Dienste – Start aus dem offiziellen Repository
+
+Diese Projekte bringen neben der Compose-Datei weitere Dateien mit (Nginx-Konfiguration,
+Build-Kontexte, Initialisierungsskripte). Eine einzelne kopierte Compose-Datei würde nicht
+laufen, deshalb wird hier das offizielle Repository auf dem Server geklont statt Dateien
+in dieses Repo zu übernehmen. Die folgenden Abläufe sind aus den jeweiligen READMEs
+übernommen und hier nicht getestet.
+
+### AppFlowy (Notizen, Datenbanken, Projektboards)
+
+Quelle: <https://github.com/AppFlowy-IO/AppFlowy-Cloud>
+
+```bash
+git clone https://github.com/AppFlowy-IO/AppFlowy-Cloud
+```
+
+```bash
+cd AppFlowy-Cloud && cp deploy.env .env
+```
+
+`.env` anpassen (Passwörter, Domain), dann `docker compose up -d`. Der Stack umfasst rund
+zehn Container (u. a. Postgres, MinIO, Redis, GoTrue, Nginx) und belegt die Ports 80/443.
+AppFlowy deckt weitgehend denselben Zweck ab wie Anytype – eines von beiden genügt.
+
+### Cal.com (Terminbuchung)
+
+Quelle: <https://github.com/calcom/docker>
+
+```bash
+git clone https://github.com/calcom/docker calcom-docker
+```
+
+```bash
+cd calcom-docker && cp .env.example .env
+```
+
+In `.env` mindestens `NEXTAUTH_SECRET` und `CALENDSO_ENCRYPTION_KEY` setzen, dann
+`docker compose up -d`. Standardport 3000.
+
+### OpenProject (Projektmanagement)
+
+Quelle: <https://github.com/opf/openproject-docker-compose>
+
+```bash
+git clone https://github.com/opf/openproject-docker-compose.git --depth=1 --branch=stable/17 openproject
+```
+
+```bash
+cd openproject && cp .env.example .env
+```
+
+In `.env` `SECRET_KEY_BASE` und das Datenbank-Passwort ersetzen, dann
+`docker compose up -d --build --pull always`. Erreichbar unter <http://localhost:8080>
+(nur lokal gebunden). Mindestens 4 GB RAM.
+
+### Cap (Bildschirmaufnahmen teilen)
+
+Quelle: <https://github.com/CapSoftware/Cap>
+
+```bash
+git clone https://github.com/CapSoftware/Cap.git
+```
+
+```bash
+cd Cap && docker compose up -d
+```
+
+Standardport 3000. Ohne konfigurierten E-Mail-Versand erscheinen die Login-Links in
+`docker compose logs cap-web`. Die Desktop-App wird unter „Cap Server URL" auf die eigene
+Instanz gestellt.
+
+### Chatwoot (Kunden-Chat und Support-Postfach)
+
+Quelle: <https://github.com/chatwoot/chatwoot> – die Dateien `.env.example` und
+`docker-compose.production.yaml` aus dem Repository laden, als `.env` und
+`docker-compose.yaml` ablegen, `SECRET_KEY_BASE`, `FRONTEND_URL` und die Passwörter für
+Postgres und Redis setzen. Vor dem ersten Start die Datenbank vorbereiten:
+
+```bash
+docker compose run --rm rails bundle exec rails db:chatwoot_prepare
+```
+
+```bash
+docker compose up -d
+```
+
+Standardport 3000, nur lokal gebunden.
+
+### Portkonflikt
+
+Twenty, Cal.com, Cap und Chatwoot wollen alle Port 3000. Auf einem gemeinsamen Server muss
+jeder Dienst einen eigenen Host-Port bekommen (in der jeweiligen `.env` bzw. Compose-Datei)
+oder hinter einem Reverse-Proxy mit eigener Subdomain laufen.
+
+## Desktop-Apps (kein Server)
+
+- **OpenWhispr** (<https://github.com/OpenWhispr/openwhispr>, MIT): Diktier-App mit lokalen
+  oder Cloud-Modellen. Installation auf dem eigenen Rechner über die Releases.
+- **VoiceStudio** (<https://github.com/debpalash/VoiceStudio>, AGPL-3.0): lokale
+  Sprachsynthese, Stimmklone und Vertonung. Braucht eine GPU bzw. Apple Silicon. Für
+  bezahlte Kundenarbeit nennt das Projekt eine eigene kommerzielle Lizenz – vor
+  gewerblichem Einsatz prüfen. Stimmen realer Personen nur mit deren Einwilligung klonen.
+
 ## CrowdSec
 
 CrowdSec wertet Logdateien aus und sperrt angreifende IP-Adressen. Es schützt den Host und
@@ -256,6 +361,6 @@ Whiteboard Teil eines eigenen Produkts werden soll.
 
 ## Prüfstand
 
-Alle sechs Compose-Dateien wurden mit `docker compose config` syntaktisch validiert.
+Die sechs Compose-Dateien in diesem Repo wurden mit `docker compose config` syntaktisch validiert.
 Ein echter Start (`docker compose up`) wurde nicht getestet, weil in der
 Entwicklungsumgebung kein Docker-Daemon lief.
