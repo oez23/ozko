@@ -11,6 +11,7 @@ mit Docker und Docker Compose.
 | Jellyfin | Medienserver (Filme, Serien, Musik) | `jellyfin/` – Compose nach offizieller Anleitung |
 | Documenso | Dokumente digital signieren | `documenso/` – offizielle Compose-Datei |
 | Postiz | Social-Media-Planung | `postiz/` – offizielle Compose-Datei |
+| OpenSEO | SEO-Analyse (Keywords, Rankings, Backlinks) | `open-seo/` – offizielle Compose-Datei |
 | Inbox Zero | KI-Assistent für das E-Mail-Postfach | `inbox-zero/` – offizielle Compose-Datei |
 | AppFlowy, Cal.com, OpenProject, Cap, Chatwoot | siehe Abschnitt „Weitere Dienste“ | Start direkt aus dem offiziellen Repository |
 | OpenWhispr, VoiceStudio | Diktat / Sprachsynthese | Desktop-Apps – siehe unten |
@@ -19,7 +20,7 @@ mit Docker und Docker Compose.
 | Papermark | Dokumente teilen mit Tracking | kein Compose – siehe unten |
 | tldraw | Whiteboard | kein Compose – siehe unten |
 
-Die Compose-Dateien für Immich, Twenty, Documenso, Postiz und Inbox Zero sind unverändert von den Projekten übernommen
+Die Compose-Dateien für Immich, Twenty, Documenso, Postiz, Inbox Zero und OpenSEO sind unverändert von den Projekten übernommen
 (Stand 2026-11-19); für Updates die Datei neu von der Quelle laden, nicht von Hand
 anpassen. Jellyfin liefert keine fertige Datei – die hier folgt der offiziellen Anleitung.
 
@@ -172,6 +173,31 @@ Zu beachten – dieser Dienst hat die höchste Einstiegshürde und das höchste 
   (Auftragsverarbeitung, Speicherort).
 - Der Dienst kann E-Mails senden, archivieren und löschen. Automatische Regeln zuerst im
   Entwurfs- bzw. Testmodus prüfen.
+
+## OpenSEO
+
+Quelle: <https://github.com/every-app/open-seo> · Doku: `docs/SELF_HOSTING_DOCKER.md` im Repository
+
+```bash
+cd selfhost/open-seo
+cp .env.example .env
+```
+
+In `.env` den `DATAFORSEO_API_KEY` eintragen.
+
+```bash
+docker compose up -d
+```
+
+Danach <http://localhost:3003> öffnen.
+
+Zu beachten:
+
+- Die SEO-Daten kommen von DataForSEO und kosten pro Abfrage; ohne Schlüssel bleibt die App leer.
+- Diese Compose-Datei startet OpenSEO **ohne Anmeldung** (`AUTH_MODE=local_noauth`). Der Port ist
+  nur lokal gebunden – so belassen und von außen nur über VPN oder einen Proxy mit eigener
+  Anmeldung erreichbar machen. Für Konten mit Passwort gibt es laut Projekt eine eigene
+  Standalone-Variante.
 
 ## Weitere Dienste – Start aus dem offiziellen Repository
 
@@ -351,7 +377,7 @@ Whiteboard Teil eines eigenen Produkts werden soll.
 ## Sicherheit und Betrieb
 
 - `.env`-Dateien enthalten Secrets und sind per `.gitignore` ausgeschlossen. Nie committen.
-- Die Ports 2283, 3000, 3001, 3002, 4007 und 8096 nicht direkt ins Internet freigeben. Zugriff von außen über
+- Die Ports 2283, 3000, 3001, 3002, 3003, 4007 und 8096 nicht direkt ins Internet freigeben. Zugriff von außen über
   VPN (z. B. Tailscale/WireGuard) oder einen Reverse-Proxy mit HTTPS.
 - Backups einplanen, bevor echte Daten hineinkommen: Immich braucht Datenbank-Dump
   **und** `UPLOAD_LOCATION`; Twenty die Docker-Volumes `db-data` und `server-local-data`;
@@ -361,6 +387,6 @@ Whiteboard Teil eines eigenen Produkts werden soll.
 
 ## Prüfstand
 
-Die sechs Compose-Dateien in diesem Repo wurden mit `docker compose config` syntaktisch validiert.
+Die sieben Compose-Dateien in diesem Repo wurden mit `docker compose config` syntaktisch validiert.
 Ein echter Start (`docker compose up`) wurde nicht getestet, weil in der
 Entwicklungsumgebung kein Docker-Daemon lief.
