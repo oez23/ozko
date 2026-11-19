@@ -9,11 +9,12 @@ mit Docker und Docker Compose.
 | Immich | Foto- und Videoverwaltung | `immich/` – offizielle Compose-Datei |
 | Twenty | CRM | `twenty/` – offizielle Compose-Datei |
 | Jellyfin | Medienserver (Filme, Serien, Musik) | `jellyfin/` – Compose nach offizieller Anleitung |
+| Documenso | Dokumente digital signieren | `documenso/` – offizielle Compose-Datei |
 | Anytype | Notizen / Wissensbasis | Desktop-App, kein Server nötig – siehe unten |
 | Papermark | Dokumente teilen mit Tracking | kein Compose – siehe unten |
 | tldraw | Whiteboard | kein Compose – siehe unten |
 
-Die Compose-Dateien für Immich und Twenty sind unverändert von den Projekten übernommen
+Die Compose-Dateien für Immich, Twenty und Documenso sind unverändert von den Projekten übernommen
 (Stand 2026-11-19); für Updates die Datei neu von der Quelle laden, nicht von Hand
 anpassen. Jellyfin liefert keine fertige Datei – die hier folgt der offiziellen Anleitung.
 
@@ -78,6 +79,35 @@ docker compose up -d
 Danach <http://localhost:8096> öffnen und den Einrichtungsassistenten durchlaufen.
 Hardware-Transcoding (GPU) ist nicht konfiguriert; bei Bedarf nach der Jellyfin-Doku ergänzen.
 
+## Documenso
+
+Quelle: <https://github.com/documenso/documenso/tree/main/docker/production> · Doku: <https://docs.documenso.com/docs/self-hosting/deployment/docker-compose>
+
+Documenso braucht mehr Vorarbeit als die anderen Dienste:
+
+1. **Signaturzertifikat** als `/opt/documenso/cert.p12` auf dem Host ablegen (der Pfad ist
+   in der offiziellen Compose-Datei fest eingetragen). Anleitung:
+   <https://docs.documenso.com/docs/self-hosting/configuration/signing-certificate>
+2. **SMTP-Zugang** – ohne E-Mail-Versand erreichen Signatur-Anfragen niemanden.
+
+```bash
+cd selfhost/documenso
+cp .env.example .env
+```
+
+In `.env` alle `CHANGE_ME`-Werte ersetzen (Datenbank-Passwort in beiden Zeilen gleich).
+
+```bash
+docker compose up -d
+```
+
+Danach <http://localhost:3001> öffnen, Konto anlegen und anschließend
+`NEXT_PUBLIC_DISABLE_SIGNUP=true` setzen.
+
+Rechtlicher Hinweis: Ein selbst erzeugtes Zertifikat ergibt eine einfache elektronische
+Signatur. Für Verträge, die Schriftform oder eine qualifizierte Signatur (eIDAS) verlangen,
+reicht das nicht – das vor dem Einsatz für Immobilien- oder Arbeitsverträge klären.
+
 ## Anytype
 
 Anytype ist eine lokale Desktop- und Mobil-App mit Ende-zu-Ende-verschlüsselter
@@ -124,15 +154,15 @@ Whiteboard Teil eines eigenen Produkts werden soll.
 ## Sicherheit und Betrieb
 
 - `.env`-Dateien enthalten Secrets und sind per `.gitignore` ausgeschlossen. Nie committen.
-- Die Ports 2283, 3000 und 8096 nicht direkt ins Internet freigeben. Zugriff von außen über
+- Die Ports 2283, 3000, 3001 und 8096 nicht direkt ins Internet freigeben. Zugriff von außen über
   VPN (z. B. Tailscale/WireGuard) oder einen Reverse-Proxy mit HTTPS.
 - Backups einplanen, bevor echte Daten hineinkommen: Immich braucht Datenbank-Dump
   **und** `UPLOAD_LOCATION`; Twenty die Docker-Volumes `db-data` und `server-local-data`;
-  Jellyfin den Ordner `config`.
+  Jellyfin den Ordner `config`; Documenso das Volume `database` und das Zertifikat.
 - Vor Updates die Release Notes lesen – die Projekte haben gelegentlich Breaking Changes.
 
 ## Prüfstand
 
-Alle drei Compose-Dateien wurden mit `docker compose config` syntaktisch validiert.
+Alle vier Compose-Dateien wurden mit `docker compose config` syntaktisch validiert.
 Ein echter Start (`docker compose up`) wurde nicht getestet, weil in der
 Entwicklungsumgebung kein Docker-Daemon lief.
