@@ -1,1 +1,6 @@
 fotos/fotos-optimiert.zip
+
+# selfhost: lokale Secrets und Daten nie committen
+selfhost/**/.env
+selfhost/immich/library/
+selfhost/immich/postgres/
