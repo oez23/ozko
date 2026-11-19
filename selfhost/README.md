@@ -11,12 +11,13 @@ mit Docker und Docker Compose.
 | Jellyfin | Medienserver (Filme, Serien, Musik) | `jellyfin/` – Compose nach offizieller Anleitung |
 | Documenso | Dokumente digital signieren | `documenso/` – offizielle Compose-Datei |
 | Postiz | Social-Media-Planung | `postiz/` – offizielle Compose-Datei |
+| Inbox Zero | KI-Assistent für das E-Mail-Postfach | `inbox-zero/` – offizielle Compose-Datei |
 | CrowdSec | Angriffserkennung und IP-Sperren | nativ auf dem Host – siehe unten |
 | Anytype | Notizen / Wissensbasis | Desktop-App, kein Server nötig – siehe unten |
 | Papermark | Dokumente teilen mit Tracking | kein Compose – siehe unten |
 | tldraw | Whiteboard | kein Compose – siehe unten |
 
-Die Compose-Dateien für Immich, Twenty, Documenso und Postiz sind unverändert von den Projekten übernommen
+Die Compose-Dateien für Immich, Twenty, Documenso, Postiz und Inbox Zero sind unverändert von den Projekten übernommen
 (Stand 2026-11-19); für Updates die Datei neu von der Quelle laden, nicht von Hand
 anpassen. Jellyfin liefert keine fertige Datei – die hier folgt der offiziellen Anleitung.
 
@@ -140,6 +141,36 @@ Zu beachten:
 - Die Datenbank-Passwörter in der offiziellen Datei sind Standardwerte. Die Datenbanken sind
   nur im internen Docker-Netz erreichbar; die Ports dürfen nicht nach außen freigegeben werden.
 
+## Inbox Zero
+
+Quelle: <https://github.com/elie222/inbox-zero> · Doku: <https://docs.getinboxzero.com>
+
+```bash
+cd selfhost/inbox-zero
+cp .env.example .env
+```
+
+In `.env` alle `CHANGE_ME`-Werte ersetzen.
+
+```bash
+docker compose --profile all up -d
+```
+
+Danach <http://localhost:3002> öffnen. Ohne `--profile all` starten Datenbank und Redis nicht.
+
+Zu beachten – dieser Dienst hat die höchste Einstiegshürde und das höchste Datenrisiko im Stack:
+
+- Er braucht ein Google-Cloud-Projekt mit Gmail-API, OAuth-Client und Pub/Sub-Topic. Die
+  Gmail-Berechtigungen sind von Google als „restricted" eingestuft; ohne Verifizierung läuft
+  die App nur im Testmodus mit eingetragenen Testnutzern.
+- Für Push-Benachrichtigungen von Gmail muss die Instanz aus dem Internet per HTTPS erreichbar
+  sein – reiner VPN-Betrieb reicht dafür nicht.
+- Der Inhalt der E-Mails wird an den eingetragenen KI-Anbieter gesendet und verursacht dort
+  laufende Kosten. Vor dem Einsatz mit Geschäfts- oder Kundenpost die DSGVO-Seite klären
+  (Auftragsverarbeitung, Speicherort).
+- Der Dienst kann E-Mails senden, archivieren und löschen. Automatische Regeln zuerst im
+  Entwurfs- bzw. Testmodus prüfen.
+
 ## CrowdSec
 
 CrowdSec wertet Logdateien aus und sperrt angreifende IP-Adressen. Es schützt den Host und
@@ -215,16 +246,16 @@ Whiteboard Teil eines eigenen Produkts werden soll.
 ## Sicherheit und Betrieb
 
 - `.env`-Dateien enthalten Secrets und sind per `.gitignore` ausgeschlossen. Nie committen.
-- Die Ports 2283, 3000, 3001, 4007 und 8096 nicht direkt ins Internet freigeben. Zugriff von außen über
+- Die Ports 2283, 3000, 3001, 3002, 4007 und 8096 nicht direkt ins Internet freigeben. Zugriff von außen über
   VPN (z. B. Tailscale/WireGuard) oder einen Reverse-Proxy mit HTTPS.
 - Backups einplanen, bevor echte Daten hineinkommen: Immich braucht Datenbank-Dump
   **und** `UPLOAD_LOCATION`; Twenty die Docker-Volumes `db-data` und `server-local-data`;
   Jellyfin den Ordner `config`; Documenso das Volume `database` und das Zertifikat;
-  Postiz die Volumes `postgres-volume` und `postiz-uploads`.
+  Postiz die Volumes `postgres-volume` und `postiz-uploads`; Inbox Zero das Volume `database-data`.
 - Vor Updates die Release Notes lesen – die Projekte haben gelegentlich Breaking Changes.
 
 ## Prüfstand
 
-Alle fünf Compose-Dateien wurden mit `docker compose config` syntaktisch validiert.
+Alle sechs Compose-Dateien wurden mit `docker compose config` syntaktisch validiert.
 Ein echter Start (`docker compose up`) wurde nicht getestet, weil in der
 Entwicklungsumgebung kein Docker-Daemon lief.
