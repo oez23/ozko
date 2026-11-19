@@ -6,3 +6,4 @@ selfhost/immich/library/
 selfhost/immich/postgres/
 selfhost/jellyfin/config/
 selfhost/jellyfin/cache/
+selfhost/postiz/docker-compose.override.yaml

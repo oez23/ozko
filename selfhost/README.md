@@ -10,11 +10,13 @@ mit Docker und Docker Compose.
 | Twenty | CRM | `twenty/` – offizielle Compose-Datei |
 | Jellyfin | Medienserver (Filme, Serien, Musik) | `jellyfin/` – Compose nach offizieller Anleitung |
 | Documenso | Dokumente digital signieren | `documenso/` – offizielle Compose-Datei |
+| Postiz | Social-Media-Planung | `postiz/` – offizielle Compose-Datei |
+| CrowdSec | Angriffserkennung und IP-Sperren | nativ auf dem Host – siehe unten |
 | Anytype | Notizen / Wissensbasis | Desktop-App, kein Server nötig – siehe unten |
 | Papermark | Dokumente teilen mit Tracking | kein Compose – siehe unten |
 | tldraw | Whiteboard | kein Compose – siehe unten |
 
-Die Compose-Dateien für Immich, Twenty und Documenso sind unverändert von den Projekten übernommen
+Die Compose-Dateien für Immich, Twenty, Documenso und Postiz sind unverändert von den Projekten übernommen
 (Stand 2026-11-19); für Updates die Datei neu von der Quelle laden, nicht von Hand
 anpassen. Jellyfin liefert keine fertige Datei – die hier folgt der offiziellen Anleitung.
 
@@ -108,6 +110,65 @@ Rechtlicher Hinweis: Ein selbst erzeugtes Zertifikat ergibt eine einfache elektr
 Signatur. Für Verträge, die Schriftform oder eine qualifizierte Signatur (eIDAS) verlangen,
 reicht das nicht – das vor dem Einsatz für Immobilien- oder Arbeitsverträge klären.
 
+## Postiz
+
+Quelle: <https://github.com/gitroomhq/postiz-docker-compose> · Doku: <https://docs.postiz.com>
+
+Die offizielle Compose-Datei enthält alle Einstellungen direkt in der Datei. Damit keine
+Secrets in Git landen, kommen eigene Werte in eine Override-Datei, die nicht versioniert wird:
+
+```bash
+cd selfhost/postiz
+cp docker-compose.override.example.yaml docker-compose.override.yaml
+```
+
+In `docker-compose.override.yaml` setzen: `JWT_SECRET` (Ausgabe von `openssl rand -base64 48`)
+und die Zugangsdaten der Netzwerke, die genutzt werden sollen.
+
+```bash
+docker compose up -d
+```
+
+Danach <http://localhost:4007> öffnen, Konto anlegen und `DISABLE_REGISTRATION: 'true'` setzen.
+
+Zu beachten:
+
+- Der Stack ist schwer: neben Postiz laufen Postgres, Redis, Temporal, ein zweites Postgres
+  und Elasticsearch. Mindestens 4 GB freier RAM nur dafür.
+- Jedes soziale Netzwerk verlangt eine eigene Entwickler-App mit Prüfung durch den Anbieter
+  (Meta, TikTok, Google). Das ist der eigentliche Aufwand, nicht das Docker-Setup.
+- Die Datenbank-Passwörter in der offiziellen Datei sind Standardwerte. Die Datenbanken sind
+  nur im internen Docker-Netz erreichbar; die Ports dürfen nicht nach außen freigegeben werden.
+
+## CrowdSec
+
+CrowdSec wertet Logdateien aus und sperrt angreifende IP-Adressen. Es schützt den Host und
+gehört deshalb direkt auf den Server, nicht in einen der App-Stacks. Sinnvoll wird es erst,
+wenn Dienste aus dem Internet erreichbar sind – hinter VPN ohne offene Ports bringt es wenig.
+
+Installation auf Debian/Ubuntu (Doku: <https://docs.crowdsec.net>):
+
+```bash
+curl -s https://install.crowdsec.net | sudo sh
+```
+
+```bash
+sudo apt install crowdsec
+```
+
+```bash
+sudo apt install crowdsec-firewall-bouncer-nftables
+```
+
+Der erste Befehl richtet die Paketquelle ein, der zweite installiert die Erkennung, der dritte
+den „Bouncer", der die Sperren in der Firewall durchsetzt – ohne Bouncer wird nur erkannt,
+nicht gesperrt. Danach die passende Collection für den Reverse-Proxy installieren
+(z. B. `sudo cscli collections install crowdsecurity/nginx`) und mit `sudo cscli metrics`
+prüfen, ob Logs gelesen werden.
+
+Hier ist bewusst keine Compose-Datei hinterlegt: Welche Logs einzubinden sind und welcher
+Bouncer passt, hängt vom Server und vom Reverse-Proxy ab, und beides steht noch nicht fest.
+
 ## Anytype
 
 Anytype ist eine lokale Desktop- und Mobil-App mit Ende-zu-Ende-verschlüsselter
@@ -154,15 +215,16 @@ Whiteboard Teil eines eigenen Produkts werden soll.
 ## Sicherheit und Betrieb
 
 - `.env`-Dateien enthalten Secrets und sind per `.gitignore` ausgeschlossen. Nie committen.
-- Die Ports 2283, 3000, 3001 und 8096 nicht direkt ins Internet freigeben. Zugriff von außen über
+- Die Ports 2283, 3000, 3001, 4007 und 8096 nicht direkt ins Internet freigeben. Zugriff von außen über
   VPN (z. B. Tailscale/WireGuard) oder einen Reverse-Proxy mit HTTPS.
 - Backups einplanen, bevor echte Daten hineinkommen: Immich braucht Datenbank-Dump
   **und** `UPLOAD_LOCATION`; Twenty die Docker-Volumes `db-data` und `server-local-data`;
-  Jellyfin den Ordner `config`; Documenso das Volume `database` und das Zertifikat.
+  Jellyfin den Ordner `config`; Documenso das Volume `database` und das Zertifikat;
+  Postiz die Volumes `postgres-volume` und `postiz-uploads`.
 - Vor Updates die Release Notes lesen – die Projekte haben gelegentlich Breaking Changes.
 
 ## Prüfstand
 
-Alle vier Compose-Dateien wurden mit `docker compose config` syntaktisch validiert.
+Alle fünf Compose-Dateien wurden mit `docker compose config` syntaktisch validiert.
 Ein echter Start (`docker compose up`) wurde nicht getestet, weil in der
 Entwicklungsumgebung kein Docker-Daemon lief.
