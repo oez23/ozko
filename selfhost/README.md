@@ -11,6 +11,7 @@ mit Docker und Docker Compose.
 | Jellyfin | Medienserver (Filme, Serien, Musik) | `jellyfin/` – Compose nach offizieller Anleitung |
 | Anytype | Notizen / Wissensbasis | Desktop-App, kein Server nötig – siehe unten |
 | Papermark | Dokumente teilen mit Tracking | kein Compose – siehe unten |
+| tldraw | Whiteboard | kein Compose – siehe unten |
 
 Die Compose-Dateien für Immich und Twenty sind unverändert von den Projekten übernommen
 (Stand 2026-11-19); für Updates die Datei neu von der Quelle laden, nicht von Hand
@@ -105,6 +106,20 @@ und betreiben.
 Empfehlung: die gehostete Version (<https://www.papermark.com>) nutzen. Ein eigenes
 Deployment lohnt erst, wenn Datenhoheit oder Kosten es klar verlangen – dann am
 einfachsten als Fork auf Vercel, nicht per Docker.
+
+## tldraw
+
+tldraw (<https://github.com/tldraw/tldraw>) ist in erster Linie ein SDK, um ein
+Whiteboard in eine eigene React-App einzubauen – kein fertiger Server. Für die
+App hinter tldraw.com gibt es kein offizielles Docker-Image und keine
+Self-Hosting-Anleitung. Die Lizenz ist zudem nicht Open Source im üblichen Sinn:
+für den Produktiveinsatz des SDK ist ein Lizenzschlüssel vorgesehen
+(Bedingungen vor dem Einsatz prüfen: <https://tldraw.dev>).
+
+Empfehlung: <https://www.tldraw.com> direkt im Browser nutzen. Wer ein selbst
+gehostetes Whiteboard braucht, ist mit Excalidraw (MIT-Lizenz, offizielles
+Docker-Image `excalidraw/excalidraw`) besser bedient. Das SDK lohnt nur, wenn ein
+Whiteboard Teil eines eigenen Produkts werden soll.
 
 ## Sicherheit und Betrieb
 
