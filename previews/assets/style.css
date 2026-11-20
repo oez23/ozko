@@ -1,0 +1,83 @@
+@font-face { font-family: "Bricolage"; src: url("bricolage.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
+@font-face { font-family: "Source Serif"; src: url("source-serif.woff2") format("woff2"); font-weight: 200 900; font-display: swap; }
+
+:root {
+  --moos: #1d3527;
+  --rasen: #4c8a3b;
+  --blatt: #a9cf8e;
+  --kies: #e6eae2;
+  --hell: #f6f9f4;
+  --loewenzahn: #f4c52d;
+  --erde: #26211d;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--hell); color: var(--erde); font: 400 1.125rem/1.65 "Source Serif", Georgia, serif; }
+h1, h2, h3, .knopf, .hinweis, nav { font-family: "Bricolage", "Segoe UI", sans-serif; }
+h1, h2, h3 { line-height: 1.05; margin: 0; letter-spacing: -0.02em; }
+a { color: inherit; }
+a:focus-visible, .knopf:focus-visible { outline: 3px solid var(--loewenzahn); outline-offset: 3px; }
+.breite { max-width: 72rem; margin: 0 auto; padding: 0 1.25rem; }
+
+.hinweis { background: var(--loewenzahn); color: var(--erde); font-size: 0.9rem; line-height: 1.4; padding: 0.6rem 0; }
+.hinweis strong { font-weight: 700; }
+
+.kopf { background: var(--moos); color: var(--hell); }
+.kopf nav { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.1rem 0; font-size: 1rem; }
+.kopf nav .marke { font-weight: 700; min-width: 0; line-height: 1.3; }
+.kopf nav a { text-decoration: none; }
+.kopf nav .ruf { border-bottom: 2px solid var(--loewenzahn); padding-bottom: 2px; white-space: nowrap; }
+
+.buehne { display: grid; grid-template-columns: 1fr; gap: 2rem; padding: 2.5rem 0 0; }
+.buehne > * { min-width: 0; }
+.buehne h1 { font-size: clamp(2.4rem, 7vw, 5rem); font-weight: 800; text-wrap: balance; hyphens: auto; overflow-wrap: break-word; }
+.buehne h1.lang { font-size: clamp(1.9rem, 4.6vw, 3.3rem); }
+.buehne .ort { font-size: 1.3rem; color: var(--blatt); margin: 1.2rem 0 0; max-width: 28rem; }
+.buehne .aktionen { display: flex; flex-wrap: wrap; gap: 0.9rem 1.5rem; align-items: center; margin-top: 2rem; }
+.knopf { display: inline-block; background: var(--loewenzahn); color: var(--erde); font-weight: 700; font-size: 1.15rem; padding: 0.95rem 1.5rem; border-radius: 999px; text-decoration: none; }
+.knopf:hover { background: #ffd84f; }
+.buehne .zweit { color: var(--hell); font-family: "Bricolage", sans-serif; }
+
+/* Der Gartenplan: das eine auffaellige Element der Seite */
+.plan { width: 100%; height: auto; display: block; margin-bottom: -1px; }
+.plan .linie { fill: none; stroke: var(--blatt); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 1; animation: zeichnen 1.6s ease-out forwards; }
+.plan .linie.spaet { animation-delay: 0.5s; }
+.plan .flaeche { opacity: 0; animation: einblenden 0.8s 1.4s ease-out forwards; }
+.plan text { font: 600 15px "Bricolage", sans-serif; fill: var(--hell); opacity: 0; animation: einblenden 0.6s 1.8s ease-out forwards; }
+.plan .mass { stroke: var(--loewenzahn); stroke-width: 1.5; fill: none; opacity: 0; animation: einblenden 0.6s 1.8s ease-out forwards; }
+@keyframes zeichnen { to { stroke-dashoffset: 0; } }
+@keyframes einblenden { to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .plan .linie, .plan .flaeche, .plan text, .plan .mass { animation: none; stroke-dashoffset: 0; opacity: 1; }
+  html { scroll-behavior: auto; }
+}
+
+.abschnitt { padding: 4.5rem 0; }
+.abschnitt h2 { font-size: clamp(1.9rem, 4.5vw, 3rem); font-weight: 700; max-width: 22ch; }
+.abschnitt .einleitung { max-width: 38rem; margin: 1.2rem 0 0; }
+
+.leistungen { list-style: none; margin: 2.5rem 0 0; padding: 0; border-top: 2px solid var(--moos); }
+.leistungen li { display: grid; grid-template-columns: 1fr; gap: 0.3rem; padding: 1.3rem 0; border-bottom: 1px solid #c9d1c3; }
+.leistungen h3 { font-size: 1.45rem; font-weight: 600; }
+.leistungen p { margin: 0; max-width: 34rem; }
+
+.stimme { background: var(--kies); }
+.stimme .zahl { font: 800 clamp(4rem, 14vw, 8rem)/0.9 "Bricolage", sans-serif; color: var(--rasen); letter-spacing: -0.04em; }
+.stimme p { max-width: 32rem; margin: 1rem 0 0; }
+
+.bilder { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-top: 2.5rem; }
+.bilder div { aspect-ratio: 4 / 3; border: 2px dashed var(--rasen); border-radius: 6px; display: grid; place-items: center; text-align: center; padding: 1.5rem; color: var(--moos); font-family: "Bricolage", sans-serif; background: #eef4ea; }
+
+.kontakt { background: var(--moos); color: var(--hell); }
+.kontakt .nummer { display: inline-block; font: 800 clamp(2.2rem, 9vw, 5rem)/1 "Bricolage", sans-serif; color: var(--loewenzahn); text-decoration: none; margin: 1.5rem 0 0; letter-spacing: -0.03em; }
+.kontakt address { font-style: normal; margin-top: 1.5rem; color: var(--blatt); }
+
+.fuss { background: var(--erde); color: #cfc9c2; font-size: 0.95rem; padding: 2rem 0; }
+.fuss p { margin: 0; max-width: 46rem; }
+
+@media (min-width: 52rem) {
+  .buehne { grid-template-columns: 5fr 6fr; align-items: end; gap: 3rem; padding-top: 4rem; }
+  .buehne .text { padding-bottom: 4rem; }
+  .leistungen li { grid-template-columns: 18rem 1fr; gap: 2rem; align-items: baseline; }
+  .bilder { grid-template-columns: repeat(3, 1fr); }
+}

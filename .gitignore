@@ -3,3 +3,4 @@ fotos/fotos-optimiert.zip
 # Lead-Daten (Kontaktdaten, nicht oeffentlich ablegen)
 leads/raw/
 leads/*.csv
+previews/dist/
