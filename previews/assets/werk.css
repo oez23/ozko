@@ -1,0 +1,51 @@
+@font-face { font-family: "Archivo"; src: url("archivo.woff2") format("woff2"); font-weight: 100 900; font-stretch: 62% 125%; font-display: swap; }
+:root { --beton: #e8eaeb; --tinte: #15181a; --signal: #ff5b1a; --tanne: #0f4d2e; --weiss: #ffffff; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--beton); color: var(--tinte); font: 400 1.0625rem/1.55 "Archivo", "Arial Narrow", sans-serif; padding-bottom: 4.5rem; }
+h1, h2, h3 { margin: 0; font-stretch: 70%; font-weight: 900; line-height: 0.95; text-transform: uppercase; }
+a { color: inherit; }
+a:focus-visible { outline: 4px solid var(--signal); outline-offset: 3px; }
+.breite { max-width: 76rem; margin: 0 auto; padding: 0 1.1rem; }
+.hinweis { background: var(--tinte); color: var(--beton); font-size: 0.875rem; padding: 0.55rem 0; }
+.kopf { border-bottom: 4px solid var(--tinte); }
+.kopf .zeile { display: flex; justify-content: space-between; gap: 1rem; padding: 0.9rem 0; font-weight: 700; border-bottom: 2px solid var(--tinte); }
+.kopf h1 { font-size: clamp(2.4rem, 8.4vw, 6.8rem); padding: 1.6rem 0 1.2rem; text-wrap: balance; overflow-wrap: break-word; }
+.kopf h1.lang { font-size: clamp(2rem, 6.2vw, 5rem); }
+.streifen { display: grid; grid-template-columns: 1fr; border-top: 4px solid var(--tinte); }
+.streifen p { margin: 0; padding: 1.2rem 0; font-size: 1.25rem; max-width: 30rem; }
+.streifen .ruf { display: block; background: var(--signal); color: var(--tinte); text-decoration: none; padding: 1.2rem 1.1rem; margin: 0 -1.1rem; font-weight: 900; font-stretch: 70%; font-size: clamp(2rem, 9vw, 4.2rem); line-height: 1; }
+.streifen .ruf small { display: block; font-size: 1rem; font-weight: 600; font-stretch: 100%; margin-bottom: 0.4rem; }
+.streifen .ruf:hover { background: var(--tinte); color: var(--signal); }
+.abschnitt { padding: 3.5rem 0; }
+.abschnitt h2 { font-size: clamp(2rem, 6vw, 4rem); }
+.abschnitt .einleitung { max-width: 36rem; margin: 1rem 0 0; }
+.leistungen { list-style: none; padding: 0; margin: 2rem 0 0; display: grid; grid-template-columns: 1fr; border: 3px solid var(--tinte); background: var(--weiss); }
+.leistungen li { padding: 1.4rem 1.2rem 1.6rem; border-bottom: 3px solid var(--tinte); }
+.leistungen li:last-child { border-bottom: 0; }
+.leistungen h3 { font-size: 1.7rem; color: var(--tanne); margin-bottom: 0.6rem; }
+.leistungen p { margin: 0; }
+.stimme { background: var(--tanne); color: var(--weiss); }
+.stimme .breite { display: grid; gap: 1rem; align-items: center; }
+.stimme .zahl { font-weight: 900; font-stretch: 62%; font-size: clamp(5rem, 22vw, 12rem); line-height: 0.85; color: var(--signal); }
+.stimme p { margin: 0; font-size: 1.3rem; max-width: 26rem; }
+.bilder { display: grid; grid-template-columns: 1fr; gap: 0; margin-top: 2rem; border: 3px solid var(--tinte); }
+.bilder div { aspect-ratio: 4 / 3; display: grid; place-items: center; text-align: center; padding: 1.2rem; font-weight: 700; border-bottom: 3px solid var(--tinte); background: repeating-linear-gradient(45deg, #dcdfe0 0 14px, var(--beton) 14px 28px); }
+.bilder div:last-child { border-bottom: 0; }
+.kontakt address { font-style: normal; font-size: 1.3rem; margin-top: 1rem; }
+.fuss { border-top: 4px solid var(--tinte); padding: 1.5rem 0; font-size: 0.9rem; }
+.fuss p { margin: 0; max-width: 46rem; }
+.leiste { position: fixed; left: 0; right: 0; bottom: 0; background: var(--signal); border-top: 3px solid var(--tinte); text-align: center; padding: 0.9rem; font-weight: 900; font-stretch: 75%; font-size: 1.3rem; text-decoration: none; text-transform: uppercase; }
+@media (min-width: 52rem) {
+  body { padding-bottom: 0; }
+  .leiste { display: none; }
+  .streifen { grid-template-columns: 1fr auto; align-items: stretch; }
+  .streifen .ruf { margin: 0; padding: 1.4rem 2rem; border-left: 4px solid var(--tinte); }
+  .leistungen { grid-template-columns: repeat(3, 1fr); }
+  .leistungen li { border-bottom: 3px solid var(--tinte); border-right: 3px solid var(--tinte); }
+  .leistungen li:nth-child(3n) { border-right: 0; }
+  .leistungen li:nth-last-child(-n+3) { border-bottom: 0; }
+  .stimme .breite { grid-template-columns: auto 1fr; gap: 3rem; }
+  .bilder { grid-template-columns: repeat(3, 1fr); }
+  .bilder div { border-bottom: 0; border-right: 3px solid var(--tinte); }
+  .bilder div:last-child { border-right: 0; }
+}

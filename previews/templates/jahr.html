@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{{name}} – Garten- und Landschaftsbau in {{ort}}</title>
+<link rel="stylesheet" href="../assets/jahr.css">
+</head>
+<body>
+<div class="hinweis"><div class="breite"><strong>Vorschau.</strong> Unverbindlicher Entwurf für {{name}}, erstellt von {{absender_name}}. Nicht bei Google gelistet, nur über diesen Link erreichbar.</div></div>
+<header class="kopf">
+  <div class="breite">
+    <nav aria-label="Hauptnavigation"><span>{{ort}}</span>{{nav_telefon}}</nav>
+    <div class="titel">
+      <h1{{h1_klasse}}>{{name}}</h1>
+      <p class="ort">Gärten anlegen und pflegen, das ganze Jahr über.</p>
+      {{hero_knopf}}
+    </div>
+  </div>
+  <svg class="landschaft" viewBox="0 0 1200 420" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <circle data-tiefe="60" cx="1085" cy="235" r="46" fill="#f6d9a0"/>
+    <path data-tiefe="34" d="M0 260 C200 190 380 250 560 220 C760 186 940 250 1200 200 V420 H0Z" fill="#bfd3c4"/>
+    <g data-tiefe="20">
+      <path d="M0 310 C240 250 460 320 700 280 C900 248 1060 300 1200 270 V420 H0Z" fill="#9db5a4"/>
+      <path d="M180 300 l26 -78 l26 78z M232 306 l20 -60 l20 60z M860 280 l30 -92 l30 92z M925 286 l22 -64 l22 64z" fill="#5e8a74"/>
+    </g>
+    <g data-tiefe="6">
+      <path d="M0 360 C300 310 620 380 900 340 C1040 322 1130 350 1200 338 V420 H0Z" fill="#163b34"/>
+      <circle cx="420" cy="322" r="34" fill="#163b34"/><circle cx="462" cy="330" r="26" fill="#163b34"/>
+      <circle cx="1040" cy="318" r="30" fill="#163b34"/>
+      <circle cx="610" cy="352" r="5" fill="#c94f72"/><circle cx="640" cy="360" r="5" fill="#c94f72"/><circle cx="668" cy="352" r="5" fill="#c94f72"/><circle cx="250" cy="352" r="5" fill="#c94f72"/><circle cx="276" cy="358" r="5" fill="#c94f72"/>
+    </g>
+  </svg>
+</header>
+<main>
+  <section class="abschnitt" id="leistungen">
+    <div class="breite">
+      <h2>Was wir für Ihren Garten tun</h2>
+      <p class="einleitung">Sie sagen, was Sie sich wünschen. Wir kommen vorbei, sehen uns alles an und machen ein Angebot.</p>
+      <ul class="leistungen">
+{{leistungen}}
+      </ul>
+    </div>
+  </section>
+  <section class="jahr" aria-label="Das Gartenjahr">
+    <div class="breite">
+      <h2>Ein Jahr in Ihrem Garten</h2>
+      <div class="bahn">
+        <article><h3>Frühjahr</h3><p>Beete vorbereiten, Rasen vertikutieren und nachsäen, neu pflanzen.</p></article>
+        <article><h3>Sommer</h3><p>Mähen, wässern, Hecken in Form halten. Terrassen und Wege bauen.</p></article>
+        <article><h3>Herbst</h3><p>Rückschnitt, Laub entfernen, Stauden teilen und den Garten winterfest machen.</p></article>
+        <article><h3>Winter</h3><p>Bäume fällen und pflegen, Zäune setzen und die neue Saison planen.</p></article>
+      </div>
+    </div>
+  </section>
+  {{bewertung}}
+  <section class="abschnitt">
+    <div class="breite">
+      <h2>Gärten aus der Nachbarschaft</h2>
+      <p class="einleitung">Hier stehen später Fotos Ihrer Projekte. Drei gute Bilder überzeugen mehr als jeder Text.</p>
+      <div class="bilder"><div>Ihr Foto: fertige Terrasse</div><div>Ihr Foto: Hecke vorher und nachher</div><div>Ihr Foto: neu angelegter Rasen</div></div>
+    </div>
+  </section>
+  <section class="abschnitt kontakt" id="kontakt">
+    <div class="breite">
+      <h2>Angebot anfragen</h2>
+      <p class="einleitung" style="margin-left:auto;margin-right:auto">{{kontakt_text}}</p>
+      {{kontakt_nummer}}
+      <address>{{name}}<br>{{adresse}}</address>
+    </div>
+  </section>
+</main>
+<footer class="fuss"><div class="breite"><p>Dies ist ein Entwurf und keine offizielle Webseite von {{name}}. Die Leistungen sind Beispiele und werden mit dem Betrieb abgestimmt. Erstellt von {{absender_name}}, {{absender_telefon}}. Auf Wunsch wird die Seite sofort gelöscht.</p></div></footer>
+<script src="../assets/gsap.min.js"></script>
+<script src="../assets/ScrollTrigger.min.js"></script>
+<script src="../assets/jahr.js"></script>
+</body>
+</html>

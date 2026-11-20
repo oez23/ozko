@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{{name}} – Garten- und Landschaftsbau in {{ort}}</title>
+<link rel="stylesheet" href="../assets/werk.css">
+</head>
+<body>
+<div class="hinweis"><div class="breite"><strong>Vorschau.</strong> Unverbindlicher Entwurf für {{name}}, erstellt von {{absender_name}}. Nicht bei Google gelistet, nur über diesen Link erreichbar.</div></div>
+<header class="kopf">
+  <div class="breite">
+    <div class="zeile"><span>Garten- und Landschaftsbau</span><span>{{ort}}</span></div>
+    <h1{{h1_klasse}}>{{name}}</h1>
+    <div class="streifen">
+      <p>Wir pflegen, schneiden, pflastern und legen neu an. Ein Anruf genügt, wir sehen uns den Garten an und nennen einen Preis.</p>
+      {{werk_ruf}}
+    </div>
+  </div>
+</header>
+<main>
+  <section class="abschnitt" id="leistungen">
+    <div class="breite">
+      <h2>Das machen wir</h2>
+      <ul class="leistungen">
+{{leistungen}}
+      </ul>
+    </div>
+  </section>
+  {{bewertung}}
+  <section class="abschnitt">
+    <div class="breite">
+      <h2>Unsere Arbeit</h2>
+      <p class="einleitung">Hier stehen später Fotos Ihrer Baustellen. Vorher und nachher nebeneinander zeigt am schnellsten, was Sie können.</p>
+      <div class="bilder"><div>Ihr Foto: Terrasse</div><div>Ihr Foto: Heckenschnitt</div><div>Ihr Foto: neuer Rasen</div></div>
+    </div>
+  </section>
+  <section class="abschnitt kontakt" id="kontakt">
+    <div class="breite">
+      <h2>So erreichen Sie uns</h2>
+      <address>{{name}}<br>{{adresse}}{{werk_adresse_tel}}</address>
+    </div>
+  </section>
+</main>
+<footer class="fuss"><div class="breite"><p>Dies ist ein Entwurf und keine offizielle Webseite von {{name}}. Die Leistungen sind Beispiele und werden mit dem Betrieb abgestimmt. Erstellt von {{absender_name}}, {{absender_telefon}}. Auf Wunsch wird die Seite sofort gelöscht.</p></div></footer>
+{{werk_leiste}}
+</body>
+</html>

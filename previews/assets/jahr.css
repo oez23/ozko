@@ -1,0 +1,55 @@
+@font-face { font-family: "Fraunces"; src: url("fraunces.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Bricolage"; src: url("bricolage.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
+:root { --nebel: #edf2ef; --kiefer: #163b34; --salbei: #9db5a4; --bluete: #c94f72; --himmel: #cfe1e4; --weiss: #ffffff; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--nebel); color: var(--kiefer); font: 400 1.0625rem/1.65 "Bricolage", "Segoe UI", sans-serif; overflow-x: hidden; }
+h1, h2, h3 { font-family: "Fraunces", Georgia, serif; font-weight: 400; line-height: 1.05; margin: 0; letter-spacing: -0.01em; }
+a { color: inherit; }
+a:focus-visible { outline: 3px solid var(--bluete); outline-offset: 4px; border-radius: 4px; }
+.breite { max-width: 70rem; margin: 0 auto; padding: 0 1.25rem; }
+.hinweis { background: var(--kiefer); color: var(--nebel); font-size: 0.875rem; padding: 0.55rem 0; text-align: center; }
+
+.kopf { position: relative; min-height: 88vh; display: grid; align-content: start; text-align: center; background: linear-gradient(var(--himmel), var(--nebel) 70%); overflow: hidden; }
+.kopf nav { display: flex; justify-content: space-between; padding: 1.2rem 0; font-size: 0.95rem; position: relative; z-index: 2; }
+.kopf nav a { text-decoration: none; border-bottom: 1px solid currentColor; }
+.kopf .titel { position: relative; z-index: 2; padding: 9vh 0 0; }
+.kopf h1 { font-size: clamp(2.8rem, 9vw, 6.5rem); text-wrap: balance; hyphens: auto; overflow-wrap: break-word; }
+.kopf h1.lang { font-size: clamp(2rem, 5.4vw, 4rem); }
+.kopf .ort { margin: 1.2rem auto 0; max-width: 28rem; font-size: 1.15rem; }
+.knopf { display: inline-block; margin-top: 1.8rem; background: var(--kiefer); color: var(--nebel); padding: 0.95rem 1.8rem; border-radius: 999px; text-decoration: none; font-weight: 600; }
+.knopf:hover { background: var(--bluete); }
+.landschaft { position: absolute; left: 0; right: 0; bottom: -2px; width: 100%; height: auto; min-height: 38vh; z-index: 1; }
+
+.abschnitt { padding: 5.5rem 0; }
+.abschnitt h2 { font-size: clamp(2rem, 5vw, 3.4rem); max-width: 20ch; }
+.abschnitt .einleitung { max-width: 36rem; margin: 1.2rem 0 0; }
+.leistungen { list-style: none; padding: 0; margin: 3rem 0 0; display: grid; grid-template-columns: 1fr; gap: 2.2rem 3rem; }
+.leistungen h3 { font-size: 1.6rem; font-style: italic; }
+.leistungen p { margin: 0.5rem 0 0; max-width: 28rem; }
+
+.jahr { background: var(--kiefer); color: var(--nebel); padding: 5rem 0; overflow: hidden; }
+.jahr h2 { font-size: clamp(2rem, 5vw, 3.4rem); }
+.jahr .bahn { display: grid; gap: 2.5rem; margin-top: 2.5rem; }
+.jahr article { border-top: 1px solid var(--salbei); padding-top: 1.2rem; }
+.jahr article h3 { font-size: clamp(2.4rem, 7vw, 5rem); color: var(--salbei); }
+.jahr article p { max-width: 24rem; margin: 0.8rem 0 0; }
+
+.stimme { text-align: center; }
+.stimme .zahl { font: 300 clamp(5rem, 18vw, 10rem)/0.9 "Fraunces", serif; color: var(--bluete); }
+.stimme p { max-width: 30rem; margin: 1rem auto 0; }
+.bilder { display: grid; grid-template-columns: 1fr; gap: 1.2rem; margin-top: 2.5rem; }
+.bilder div { aspect-ratio: 3 / 4; border-radius: 12rem 12rem 12px 12px; background: var(--himmel); display: grid; place-items: center; text-align: center; padding: 2rem; }
+.kontakt { background: var(--weiss); text-align: center; }
+.kontakt h2 { margin: 0 auto; }
+.kontakt .nummer { display: inline-block; font: 400 clamp(2.4rem, 9vw, 5.5rem)/1 "Fraunces", serif; color: var(--bluete); text-decoration: none; margin-top: 1.5rem; }
+.kontakt address { font-style: normal; margin-top: 1.5rem; }
+.fuss { padding: 2rem 0; font-size: 0.9rem; }
+.fuss p { margin: 0 auto; max-width: 46rem; text-align: center; }
+
+@media (min-width: 52rem) {
+  .leistungen { grid-template-columns: repeat(2, 1fr); }
+  .bilder { grid-template-columns: repeat(3, 1fr); }
+  .jahr.quer { min-height: 100vh; display: grid; align-content: center; }
+  .jahr.quer .bahn { display: flex; gap: 6vw; width: max-content; }
+  .jahr.quer article { width: 34vw; flex: none; }
+}
