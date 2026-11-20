@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{{name}} – Garten- und Landschaftsbau in {{ort}}</title>
+<link rel="preload" as="image" href="../assets/fotos/hero.webp">
+<link rel="stylesheet" href="../assets/foto.css">
+</head>
+<body>
+<div class="hinweis"><div class="breite"><strong>Vorschau.</strong> Unverbindlicher Entwurf für {{name}}, erstellt von {{absender_name}}. Nicht bei Google gelistet, nur über diesen Link erreichbar.</div></div>
+<header class="kopf">
+  <div class="bild"><img src="../assets/fotos/hero.webp" alt="Angelegter Garten mit Hecken, Stauden und Natursteinstufen" width="2000" height="1333"></div>
+  <div class="breite"><nav aria-label="Hauptnavigation"><span>{{ort}}</span>{{nav_telefon}}</nav></div>
+  <div class="breite titel">
+    <h1{{h1_klasse}}>{{name}}</h1>
+    <p class="ort">Wir legen Gärten an und halten sie in Form. In {{ort}} und Umgebung.</p>
+    {{hero_knopf}}
+  </div>
+</header>
+<main>
+  <section class="abschnitt" id="leistungen">
+    <div class="breite">
+      <h2>Was wir für Ihren Garten tun</h2>
+      <p class="einleitung">Sie sagen, was Sie sich wünschen. Wir kommen vorbei, sehen uns alles an und nennen einen festen Preis.</p>
+      <div class="schwer">
+        <article>
+          <figure><img src="../assets/fotos/pflege.webp" alt="Gärtner schneidet einen Formbaum auf gepflegtem Rasen" loading="lazy" width="1300" height="867"></figure>
+          <div><h3>Pflege und Schnitt</h3><p>Rasen mähen, Hecken und Formgehölze schneiden, Beete in Ordnung halten. Einmalig oder regelmäßig übers ganze Jahr, Schnittgut nehmen wir mit.</p></div>
+        </article>
+        <article>
+          <figure><img src="../assets/fotos/anlage.webp" alt="Neu angelegter Garten mit geschwungenem Kiesweg und Rasenflächen" loading="lazy" width="1300" height="867"></figure>
+          <div><h3>Neuanlage</h3><p>Planung, Bodenvorbereitung und Bepflanzung für Gärten, die neu entstehen oder ein neues Gesicht bekommen. Rollrasen oder Aussaat, auf Wunsch mit Bewässerung.</p></div>
+        </article>
+        <article>
+          <figure><img src="../assets/fotos/terrasse.webp" alt="Terrasse mit Sitzplatz, umgeben von Pflanzen" loading="lazy" width="1300" height="731"></figure>
+          <div><h3>Terrassen und Wege</h3><p>Pflaster, Platten, Stufen und Einfassungen, sauber verlegt auf tragfähigem Unterbau. Damit der Sitzplatz auch nach zehn Wintern noch eben liegt.</p></div>
+        </article>
+      </div>
+      <ul class="weitere">
+        <li><h3>Baumarbeiten</h3><p>Rückschnitt und Fällung, einschließlich Abtransport.</p></li>
+        <li><h3>Zaun und Sichtschutz</h3><p>Aufbau und Reparatur von Zäunen, Toren und Sichtschutz.</p></li>
+        <li><h3>Herbst- und Winterdienst</h3><p>Laub entfernen und den Garten winterfest machen.</p></li>
+      </ul>
+    </div>
+  </section>
+  {{bewertung}}
+  <section class="abschnitt">
+    <div class="breite">
+      <h2>So kann es bei Ihnen aussehen</h2>
+      <div class="galerie">
+        <figure><img src="../assets/fotos/treppe.webp" alt="Gartentreppe aus Stein zwischen rund geschnittenen Buchskugeln" loading="lazy" width="1300" height="867"></figure>
+        <figure><img src="../assets/fotos/rasen.webp" alt="Rasenfläche unter einem blühenden Zierkirschbaum" loading="lazy" width="1300" height="867"></figure>
+        <figure><img src="../assets/fotos/anlage.webp" alt="Garten mit Kiesweg und Gräsern" loading="lazy" width="1300" height="867"></figure>
+      </div>
+      <p class="bildhinweis">Beispielbilder. Hier stehen später Fotos Ihrer eigenen Projekte.</p>
+    </div>
+  </section>
+  <section class="abschnitt kontakt" id="kontakt">
+    <div class="breite">
+      <h2>Angebot anfragen</h2>
+      <p class="einleitung">{{kontakt_text}}</p>
+      {{kontakt_nummer}}
+      <address>{{name}}<br>{{adresse}}</address>
+    </div>
+  </section>
+</main>
+<footer class="fuss"><div class="breite"><p>Dies ist ein Entwurf und keine offizielle Webseite von {{name}}. Leistungen und Fotos sind Beispiele und werden mit dem Betrieb abgestimmt. Erstellt von {{absender_name}}, {{absender_telefon}}. Auf Wunsch wird die Seite sofort gelöscht.</p></div></footer>
+{{foto_leiste}}
+<script src="../assets/gsap.min.js"></script>
+<script src="../assets/ScrollTrigger.min.js"></script>
+<script src="../assets/foto.js"></script>
+</body>
+</html>

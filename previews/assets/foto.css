@@ -1,0 +1,84 @@
+@font-face { font-family: "Fraunces"; src: url("fraunces.woff2") format("woff2"); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: "Bricolage"; src: url("bricolage.woff2") format("woff2"); font-weight: 200 800; font-display: swap; }
+:root {
+  --laub: #12281c; --farn: #2f6b45; --dunst: #f3f6f1; --stein: #d9ded6; --trieb: #d2ea6e; --weiss: #ffffff;
+  --rund: 22px;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--dunst); color: var(--laub); font: 400 1.0625rem/1.65 "Bricolage", "Segoe UI", sans-serif; padding-bottom: 4.75rem; }
+h1, h2, h3 { font-family: "Fraunces", Georgia, serif; font-weight: 380; line-height: 1.04; letter-spacing: -0.015em; margin: 0; }
+img { display: block; width: 100%; height: 100%; object-fit: cover; }
+a { color: inherit; }
+a:focus-visible { outline: 3px solid var(--trieb); outline-offset: 3px; border-radius: 6px; }
+.breite { max-width: 74rem; margin: 0 auto; padding: 0 1.25rem; }
+
+.hinweis { background: var(--laub); color: var(--dunst); font-size: 0.8125rem; line-height: 1.4; padding: 0.5rem 0; }
+
+/* Kopf: das Foto traegt die Seite */
+.kopf { position: relative; min-height: 86svh; display: grid; align-content: space-between; color: var(--weiss); overflow: hidden; isolation: isolate; }
+.kopf .bild { position: absolute; inset: 0; z-index: -2; }
+.kopf::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, rgba(10, 24, 16, 0.55) 0%, rgba(10, 24, 16, 0.15) 38%, rgba(10, 24, 16, 0.82) 100%); }
+.kopf nav { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 1.1rem 0; font-weight: 500; }
+.kopf nav .ruf { text-decoration: none; background: rgba(255, 255, 255, 0.16); backdrop-filter: blur(8px); padding: 0.6rem 1rem; border-radius: 999px; white-space: nowrap; min-height: 44px; display: inline-flex; align-items: center; }
+.kopf > .breite { width: 100%; }
+.kopf .titel { padding-top: 3rem; padding-bottom: 2.2rem; }
+.kopf .knopf { display: none; }
+.kopf h1 { font-size: clamp(2.7rem, 9.5vw, 6.6rem); text-wrap: balance; overflow-wrap: break-word; hyphens: auto; max-width: 14ch; }
+.kopf h1.lang { font-size: clamp(2rem, 5.6vw, 4rem); max-width: 22ch; }
+.kopf .ort { font-size: 1.2rem; max-width: 30rem; margin: 1.1rem 0 0; }
+.knopf { display: inline-flex; align-items: center; min-height: 52px; margin-top: 1.6rem; background: var(--trieb); color: var(--laub); padding: 0.9rem 1.7rem; border-radius: 999px; font-weight: 700; text-decoration: none; }
+.knopf:hover { background: var(--weiss); }
+
+.abschnitt { padding: 4.5rem 0; }
+.abschnitt h2 { font-size: clamp(2rem, 5.2vw, 3.6rem); max-width: 18ch; }
+.abschnitt .einleitung { max-width: 36rem; margin: 1.1rem 0 0; font-size: 1.15rem; }
+
+/* Drei Schwerpunkte mit Foto */
+.schwer { display: grid; gap: 3.5rem; margin-top: 3rem; }
+.schwer article { display: grid; gap: 1.3rem; }
+.schwer figure { margin: 0; aspect-ratio: 4 / 3; border-radius: var(--rund); overflow: hidden; }
+.schwer article:nth-child(2) figure { border-radius: 9rem var(--rund) var(--rund) var(--rund); }
+.schwer article:nth-child(3) figure { border-radius: var(--rund) var(--rund) 9rem var(--rund); }
+.schwer h3 { font-size: clamp(1.8rem, 4vw, 2.6rem); }
+.schwer p { margin: 0.7rem 0 0; max-width: 30rem; }
+
+.weitere { list-style: none; padding: 0; margin: 4rem 0 0; display: grid; gap: 0; border-top: 1px solid var(--stein); }
+.weitere li { padding: 1.2rem 0; border-bottom: 1px solid var(--stein); display: grid; gap: 0.2rem; }
+.weitere h3 { font-size: 1.4rem; }
+.weitere p { margin: 0; }
+
+.stimme { background: var(--laub); color: var(--dunst); border-radius: var(--rund); margin: 0 1.25rem; }
+.stimme .breite { display: grid; gap: 0.5rem; padding-top: 3rem; padding-bottom: 3rem; }
+.stimme .zahl { font: 300 clamp(5rem, 20vw, 10rem)/0.85 "Fraunces", serif; color: var(--trieb); }
+.stimme p { margin: 0; font-size: 1.25rem; max-width: 26rem; }
+
+.galerie { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 2.5rem; }
+.galerie figure { margin: 0; border-radius: var(--rund); overflow: hidden; aspect-ratio: 1; }
+.galerie figure:first-child { grid-column: 1 / -1; aspect-ratio: 16 / 10; }
+.bildhinweis { font-size: 0.875rem; color: #4d5f53; margin: 1rem 0 0; }
+
+.kontakt { background: var(--farn); color: var(--weiss); border-radius: var(--rund) var(--rund) 0 0; }
+.kontakt .nummer { display: inline-block; font: 380 clamp(2.5rem, 10vw, 6rem)/1 "Fraunces", serif; color: var(--trieb); text-decoration: none; margin-top: 1.4rem; }
+.kontakt address { font-style: normal; margin-top: 1.4rem; font-size: 1.1rem; }
+.fuss { background: var(--laub); color: #b9c7bd; font-size: 0.875rem; padding: 1.8rem 0; }
+.fuss p { margin: 0; max-width: 46rem; }
+
+.leiste { position: fixed; left: 0.75rem; right: 0.75rem; bottom: 0.75rem; z-index: 10; display: flex; justify-content: center; align-items: center; min-height: 56px; background: var(--trieb); color: var(--laub); border-radius: 999px; font-weight: 700; font-size: 1.1rem; text-decoration: none; box-shadow: 0 10px 30px rgba(18, 40, 28, 0.35); }
+
+@media (min-width: 54rem) {
+  body { padding-bottom: 0; }
+  .leiste { display: none; }
+  .kopf .titel { padding-bottom: 4rem; }
+  .kopf .knopf { display: inline-flex; }
+  .schwer { gap: 6rem; }
+  .schwer article { grid-template-columns: 1.15fr 1fr; align-items: center; gap: 4rem; }
+  .schwer article:nth-child(even) figure { order: 2; }
+  .weitere { grid-template-columns: repeat(3, 1fr); gap: 0 3rem; }
+  .stimme { margin: 0 auto; max-width: 71.5rem; }
+  .stimme .breite { grid-template-columns: auto 1fr; align-items: center; gap: 3.5rem; padding: 4rem 4rem; }
+  .galerie { grid-template-columns: 2fr 1fr 1fr; }
+  .galerie figure, .galerie figure:first-child { grid-column: auto; aspect-ratio: 4 / 5; }
+  .galerie figure:first-child { aspect-ratio: auto; }
+}
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }

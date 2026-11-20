@@ -44,7 +44,7 @@ LEISTUNGEN = [
     ("Zaun und Sichtschutz", "Aufbau und Reparatur von Zäunen, Toren und Sichtschutzelementen."),
 ]
 LEISTUNGEN_HTML = "\n".join(f"        <li><h3>{t}</h3><p>{p}</p></li>" for t, p in LEISTUNGEN)
-VARIANTEN = ["plan", "werk", "jahr"]
+VARIANTEN = ["foto", "plan", "werk", "jahr"]
 
 def render(template, row, cfg):
     e = html.escape
@@ -59,11 +59,12 @@ def render(template, row, cfg):
             "werk_ruf": f'<a class="ruf" href="{href}"><small>Jetzt anrufen</small>{e(tel)}</a>',
             "werk_adresse_tel": f'<br><a href="{href}">{e(tel)}</a>',
             "werk_leiste": f'<a class="leiste" href="{href}">Anrufen: {e(tel)}</a>',
+            "foto_leiste": f'<a class="leiste" href="{href}">Jetzt anrufen</a>',
         }
     else:
         teile = {"nav_telefon": "", "hero_knopf": '<a class="knopf" href="#kontakt">Kontakt</a>',
                  "kontakt_text": "Hier stehen später Ihre Telefonnummer und ein Kontaktformular.", "kontakt_nummer": "",
-                 "werk_ruf": "", "werk_adresse_tel": "", "werk_leiste": ""}
+                 "werk_ruf": "", "werk_adresse_tel": "", "werk_leiste": "", "foto_leiste": ""}
     werte = {"name": e(row["Name"]), "ort": e(ort(row["Adresse"])), "adresse": e(row["Adresse"]),
              "bewertung": bewertung_block(row), "leistungen": LEISTUNGEN_HTML,
              "h1_klasse": ' class="lang"' if len(row["Name"]) > 24 else "", "absender_name": e(cfg["absender_name"]),
