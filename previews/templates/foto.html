@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>{{name}} – Garten- und Landschaftsbau in {{ort}}</title>
-<link rel="preload" as="image" href="../assets/fotos/hero.webp">
+<link rel="preload" as="image" href="../assets/fotos/{{hero_datei}}.webp">
 <link rel="stylesheet" href="../assets/foto.css">
 </head>
-<body>
+<body{{body_attribute}}>
 <div class="hinweis"><div class="breite"><strong>Vorschau.</strong> Unverbindlicher Entwurf für {{name}}, erstellt von {{absender_name}}. Nicht bei Google gelistet, nur über diesen Link erreichbar.</div></div>
 <header class="kopf">
-  <div class="bild"><img src="../assets/fotos/hero.webp" alt="Angelegter Garten mit Hecken, Stauden und Natursteinstufen" width="2000" height="1333"></div>
+  <div class="bild"><img src="../assets/fotos/{{hero_datei}}.webp" alt="{{hero_alt}}"></div>
   <div class="breite"><nav aria-label="Hauptnavigation"><span>{{ort}}</span>{{nav_telefon}}</nav></div>
   <div class="breite titel">
     <h1{{h1_klasse}}>{{name}}</h1>
@@ -30,11 +30,11 @@
           <div><h3>Pflege und Schnitt</h3><p>Rasen mähen, Hecken und Formgehölze schneiden, Beete in Ordnung halten. Einmalig oder regelmäßig übers ganze Jahr, Schnittgut nehmen wir mit.</p></div>
         </article>
         <article>
-          <figure><img src="../assets/fotos/anlage.webp" alt="Neu angelegter Garten mit geschwungenem Kiesweg und Rasenflächen" loading="lazy" width="1300" height="867"></figure>
+          <figure><img src="../assets/fotos/{{anlage_datei}}.webp" alt="{{anlage_alt}}" loading="lazy"></figure>
           <div><h3>Neuanlage</h3><p>Planung, Bodenvorbereitung und Bepflanzung für Gärten, die neu entstehen oder ein neues Gesicht bekommen. Rollrasen oder Aussaat, auf Wunsch mit Bewässerung.</p></div>
         </article>
         <article>
-          <figure><img src="../assets/fotos/terrasse.webp" alt="Terrasse mit Sitzplatz, umgeben von Pflanzen" loading="lazy" width="1300" height="731"></figure>
+          <figure><img src="../assets/fotos/{{terrasse_datei}}.webp" alt="{{terrasse_alt}}" loading="lazy"></figure>
           <div><h3>Terrassen und Wege</h3><p>Pflaster, Platten, Stufen und Einfassungen, sauber verlegt auf tragfähigem Unterbau. Damit der Sitzplatz auch nach zehn Wintern noch eben liegt.</p></div>
         </article>
       </div>

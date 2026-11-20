@@ -82,3 +82,10 @@ a:focus-visible { outline: 3px solid var(--trieb); outline-offset: 3px; border-r
   .galerie figure:first-child { aspect-ratio: auto; }
 }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* Zweite Formsprache: gerade Kanten statt Boegen (wird je Betrieb gewechselt) */
+.kantig { --rund: 6px; }
+.kantig .schwer article:nth-child(2) figure, .kantig .schwer article:nth-child(3) figure { border-radius: var(--rund); }
+.kantig .knopf, .kantig .leiste, .kantig .kopf nav .ruf { border-radius: 8px; }
+.kantig .stimme, .kantig .kontakt { border-radius: 0; }
+.kantig .kopf h1 { font-weight: 560; }

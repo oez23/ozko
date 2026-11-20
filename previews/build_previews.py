@@ -46,7 +46,44 @@ LEISTUNGEN = [
 LEISTUNGEN_HTML = "\n".join(f"        <li><h3>{t}</h3><p>{p}</p></li>" for t, p in LEISTUNGEN)
 VARIANTEN = ["foto"]  # weitere Vorlagen in templates/: plan, werk, jahr
 
-def render(template, row, cfg):
+# Jede Vorschau bekommt eine eigene Kombination aus Farbwelt, Kopffoto und Formsprache (5 x 5 x 2 = 50).
+FARBWELTEN = [  # laub (dunkel), farn (Flaeche), dunst (Hintergrund), stein (Linien), trieb (Akzent)
+    ("#12281c", "#2f6b45", "#f3f6f1", "#d9ded6", "#d2ea6e"),
+    ("#18242b", "#35606e", "#f2f5f6", "#d6dde0", "#f4c95d"),
+    ("#2a211b", "#6b4a34", "#f7f4ef", "#e2dbd0", "#9fd17a"),
+    ("#261a26", "#6a3d5c", "#f6f3f5", "#e0d8de", "#f2b8a0"),
+    ("#0f2630", "#1f6f6b", "#f1f6f5", "#d5e0dd", "#ffd166"),
+]
+KOPFFOTOS = [
+    ("hero1", "Angelegter Garten mit Hecken, Stauden und Natursteinstufen"),
+    ("hero2", "Garten mit Rasenfläche, Sitzplatz und blühenden Sträuchern"),
+    ("hero3", "Steingarten mit Gräsern, Koniferen und Stauden"),
+    ("hero4", "Rosenbeet und Stauden am Rand einer Rasenfläche"),
+    ("hero5", "Rasenfläche vor einem modernen Wohnhaus im Abendlicht"),
+]
+ANLAGE = [("anlage", "Neu angelegter Garten mit geschwungenem Kiesweg und Rasenflächen"),
+          ("zaun", "Gartenbeet mit Stauden vor einem Sichtschutzzaun")]
+TERRASSE = [("terrasse", "Terrasse mit Sitzplatz, umgeben von Pflanzen"),
+            ("pflaster", "Runder Pflasterplatz mit Einfassung aus Granitstelen"),
+            ("sitzplatz", "Plattenterrasse mit Sonnenschirm und Sitzgruppe")]
+
+def variation(nr):
+    """Eindeutige Gestaltung fuer den Betrieb mit laufender Nummer nr (0..49)."""
+    laub, farn, dunst, stein, trieb = FARBWELTEN[nr % 5]
+    hero = KOPFFOTOS[(nr // 5 + nr) % 5]
+    kantig = (nr // 25) % 2 == 1
+    stil = f"--laub:{laub};--farn:{farn};--dunst:{dunst};--stein:{stein};--trieb:{trieb}"
+    anlage, terrasse = ANLAGE[nr % 2], TERRASSE[nr % 3]
+    return {"body_attribute": f' style="{stil}"' + (' class="kantig"' if kantig else ""),
+            "hero_datei": hero[0], "hero_alt": hero[1],
+            "anlage_datei": anlage[0], "anlage_alt": anlage[1],
+            "terrasse_datei": terrasse[0], "terrasse_alt": terrasse[1]}
+
+def plz(row):
+    m = re.search(r"\b(\d{5})\b", row["Adresse"])
+    return m.group(1) if m else ""
+
+def render(template, row, cfg, nr=0):
     e = html.escape
     tel = row["Telefon"].strip()
     if tel:
@@ -68,7 +105,7 @@ def render(template, row, cfg):
     werte = {"name": e(row["Name"]), "ort": e(ort(row["Adresse"])), "adresse": e(row["Adresse"]),
              "bewertung": bewertung_block(row), "leistungen": LEISTUNGEN_HTML,
              "h1_klasse": ' class="lang"' if len(row["Name"]) > 24 else "", "absender_name": e(cfg["absender_name"]),
-             "absender_telefon": e(cfg["absender_telefon"]), **teile}
+             "absender_telefon": e(cfg["absender_telefon"]), **teile, **variation(nr)}
     return re.sub(r"\{\{(\w+)\}\}", lambda m: werte[m.group(1)], template)
 
 def main(quelle):
@@ -79,6 +116,7 @@ def main(quelle):
     shutil.copytree(ROOT / "assets", DIST / "assets")
     (DIST / "robots.txt").write_text("User-agent: *\nDisallow: /\n")
     rows = list(csv.DictReader(open(quelle, encoding="utf-8-sig"), delimiter=";"))
+    rows.sort(key=plz)  # Nachbarn (gleiche PLZ) liegen hintereinander und bekommen so verschiedene Farbwelten
     links, benutzt = [], set()
     for nr, row in enumerate(rows):
         variante = VARIANTEN[nr % len(VARIANTEN)]  # reihum, damit nicht jeder Betrieb dieselbe Seite bekommt
@@ -87,12 +125,12 @@ def main(quelle):
             s += "-2"
         benutzt.add(s)
         (DIST / s).mkdir()
-        (DIST / s / "index.html").write_text(render(templates[variante], row, cfg), encoding="utf-8")
+        (DIST / s / "index.html").write_text(render(templates[variante], row, cfg, nr), encoding="utf-8")
         links.append([row["Name"], row["Telefon"], variante, f'{cfg["basis_url"].rstrip("/")}/{s}/'])
-    # Vergleichsseiten: der erste Betrieb in allen drei Varianten
-    for v in VARIANTEN:
-        (DIST / f"beispiel-{v}").mkdir()
-        (DIST / f"beispiel-{v}" / "index.html").write_text(render(templates[v], rows[0], cfg), encoding="utf-8")
+    # Vergleichsseiten: ein Betrieb in mehreren Ausfuehrungen
+    for nr in (0, 6, 12, 28, 34):
+        (DIST / f"beispiel-{nr}").mkdir()
+        (DIST / f"beispiel-{nr}" / "index.html").write_text(render(templates[VARIANTEN[0]], rows[0], cfg, nr), encoding="utf-8")
     with open(DIST / "links.csv", "w", newline="", encoding="utf-8-sig") as f:
         csv.writer(f, delimiter=";").writerows([["Name", "Telefon", "Variante", "Vorschau-Link"], *links])
     print(f"{len(rows)} Vorschauseiten erzeugt in {DIST}")
