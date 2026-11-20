@@ -44,7 +44,7 @@ LEISTUNGEN = [
     ("Zaun und Sichtschutz", "Aufbau und Reparatur von Zäunen, Toren und Sichtschutzelementen."),
 ]
 LEISTUNGEN_HTML = "\n".join(f"        <li><h3>{t}</h3><p>{p}</p></li>" for t, p in LEISTUNGEN)
-VARIANTEN = ["foto", "plan", "werk", "jahr"]
+VARIANTEN = ["foto"]  # weitere Vorlagen in templates/: plan, werk, jahr
 
 def render(template, row, cfg):
     e = html.escape
