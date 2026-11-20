@@ -1,4 +1,5 @@
 import { Composition } from "remotion";
+import { Analytics } from "@vercel/analytics/react";
 import { VillaReel } from "./VillaReel";
 import { FPS, TOTAL_FRAMES } from "./scenes";
 
@@ -23,6 +24,7 @@ export const RemotionRoot: React.FC = () => {
         height={1080}
         defaultProps={{ orientation: "horizontal" as const }}
       />
+      <Analytics />
     </>
   );
 };
