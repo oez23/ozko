@@ -4,3 +4,4 @@ fotos/fotos-optimiert.zip
 leads/raw/
 leads/*.csv
 previews/dist/
+__pycache__/
