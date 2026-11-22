@@ -5,3 +5,4 @@ leads/raw/
 leads/*.csv
 previews/dist/
 __pycache__/
+previews/config.local.json

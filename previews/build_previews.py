@@ -4,7 +4,7 @@ Aufruf (aus dem Repo-Wurzelverzeichnis):
     python3 previews/build_previews.py leads/galabau_hamburg_whatsapp.csv
 Schreibt ausserdem previews/dist/links.csv mit dem Vorschau-Link je Betrieb.
 """
-import csv, html, json, re, shutil, sys, unicodedata
+import base64, csv, html, io, json, os, re, shutil, sys, unicodedata
 from pathlib import Path
 
 ROOT = Path(__file__).parent
@@ -105,17 +105,30 @@ def render(template, row, cfg, nr=0):
     werte = {"name": e(row["Name"]), "ort": e(ort(row["Adresse"])), "adresse": e(row["Adresse"]),
              "bewertung": bewertung_block(row), "leistungen": LEISTUNGEN_HTML,
              "h1_klasse": ' class="lang"' if len(row["Name"]) > 24 else "", "absender_name": e(cfg["absender_name"]),
-             "absender_telefon": e(cfg["absender_telefon"]), **teile, **variation(nr)}
+             "absender_kontakt": (", " + e(cfg["absender_telefon"])) if cfg.get("absender_telefon") else "", **teile, **variation(nr)}
     return re.sub(r"\{\{(\w+)\}\}", lambda m: werte[m.group(1)], template)
 
 def main(quelle):
     cfg = json.loads((ROOT / "config.json").read_text(encoding="utf-8"))
+    lokal = ROOT / "config.local.json"  # eigene Angaben, nicht im Repository
+    if lokal.exists():
+        cfg.update(json.loads(lokal.read_text(encoding="utf-8")))
+    # Beim Bauen auf dem Hosting kommen Absender und Lead-Liste aus Umgebungsvariablen,
+    # damit beides nicht im oeffentlichen Repository liegen muss.
+    for feld, variable in (("absender_name", "PREVIEW_ABSENDER_NAME"), ("absender_telefon", "PREVIEW_ABSENDER_TELEFON"),
+                           ("basis_url", "PREVIEW_BASIS_URL")):
+        if variable in os.environ:
+            cfg[feld] = os.environ[variable]
     templates = {v: (ROOT / "templates" / f"{v}.html").read_text(encoding="utf-8") for v in VARIANTEN}
     if DIST.exists():
         shutil.rmtree(DIST)
     shutil.copytree(ROOT / "assets", DIST / "assets")
     (DIST / "robots.txt").write_text("User-agent: *\nDisallow: /\n")
-    rows = list(csv.DictReader(open(quelle, encoding="utf-8-sig"), delimiter=";"))
+    if quelle:
+        text = open(quelle, encoding="utf-8-sig").read()
+    else:
+        text = base64.b64decode(os.environ["PREVIEW_LEADS_CSV_B64"]).decode("utf-8-sig")
+    rows = list(csv.DictReader(io.StringIO(text), delimiter=";"))
     rows.sort(key=plz)  # Nachbarn (gleiche PLZ) liegen hintereinander und bekommen so verschiedene Farbwelten
     links, benutzt = [], set()
     for nr, row in enumerate(rows):
@@ -136,4 +149,4 @@ def main(quelle):
     print(f"{len(rows)} Vorschauseiten erzeugt in {DIST}")
 
 if __name__ == "__main__":
-    main(sys.argv[1])
+    main(sys.argv[1] if len(sys.argv) > 1 else None)
