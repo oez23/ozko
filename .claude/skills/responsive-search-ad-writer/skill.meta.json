@@ -1,0 +1,12 @@
+{
+  "slug": "responsive-search-ad-writer",
+  "name": "Responsive Search Ad Writer",
+  "pillar": "Match intent to the page",
+  "order": 9,
+  "description": "Write a complete Google responsive search ad from real query intent and supported page claims, then validate every asset and character limit. Use when an ad group needs credible copy, sitelinks, and callouts.",
+  "tags": ["responsive-search-ads", "ad-copy", "validation"],
+  "mcp_access": "read",
+  "platforms": ["claude-code", "claude"],
+  "author": "Kelpi (kelpi.ai)",
+  "page": "https://kelpi.ai/skills/google/responsive-search-ad-writer"
+}

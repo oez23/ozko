@@ -1,0 +1,12 @@
+{
+  "slug": "account-scorecard",
+  "name": "Account Scorecard",
+  "pillar": "Read the account",
+  "order": 3,
+  "description": "Turn a Google Ads account into a short weekly scorecard tied to the business outcome, with clear formulas, targets, and caveats. Use when a dashboard has too many numbers and too little meaning.",
+  "tags": ["scorecard", "reporting", "business-outcomes"],
+  "mcp_access": "read",
+  "platforms": ["claude-code", "claude"],
+  "author": "Kelpi (kelpi.ai)",
+  "page": "https://kelpi.ai/skills/google/account-scorecard"
+}

@@ -1,0 +1,12 @@
+{
+  "slug": "negative-keyword-builder",
+  "name": "Negative Keyword Builder",
+  "pillar": "Work the search terms",
+  "order": 5,
+  "description": "Turn confirmed bad-fit searches into a safe, approval-ready negative keyword draft with match types, scope, and collision checks. Use after search-term review, before excluding traffic.",
+  "tags": ["negative-keywords", "search-terms", "approval"],
+  "mcp_access": "read",
+  "platforms": ["claude-code", "claude"],
+  "author": "Kelpi (kelpi.ai)",
+  "page": "https://kelpi.ai/skills/google/negative-keyword-builder"
+}

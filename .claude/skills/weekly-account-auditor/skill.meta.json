@@ -1,0 +1,12 @@
+{
+  "slug": "weekly-account-auditor",
+  "name": "Weekly Account Auditor",
+  "pillar": "Read the account",
+  "order": 1,
+  "description": "Compare two complete Google Ads periods, explain the few changes that matter, and rank the next checks without changing the account. Use for a weekly review or when performance suddenly feels off.",
+  "tags": ["audit", "weekly-review", "read-only"],
+  "mcp_access": "read",
+  "platforms": ["claude-code", "claude"],
+  "author": "Kelpi (kelpi.ai)",
+  "page": "https://kelpi.ai/skills/google/weekly-account-auditor"
+}

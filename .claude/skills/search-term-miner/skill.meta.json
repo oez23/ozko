@@ -1,0 +1,12 @@
+{
+  "slug": "search-term-miner",
+  "name": "Search Term Miner",
+  "pillar": "Work the search terms",
+  "order": 4,
+  "description": "Sort paid search queries into keep, review, and exclude candidates using business fit and real performance evidence. Use to find waste without blindly blocking useful demand.",
+  "tags": ["search-terms", "wasted-spend", "query-mining"],
+  "mcp_access": "read",
+  "platforms": ["claude-code", "claude"],
+  "author": "Kelpi (kelpi.ai)",
+  "page": "https://kelpi.ai/skills/google/search-term-miner"
+}

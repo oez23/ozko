@@ -1,0 +1,12 @@
+{
+  "slug": "conversion-tracking-checker",
+  "name": "Conversion Tracking Checker",
+  "pillar": "Make the next call",
+  "order": 10,
+  "description": "Decide whether Google Ads conversion data is trustworthy enough for optimization by checking goals, action settings, duplicates, and campaign use. Use before changing bids, budgets, or performance targets.",
+  "tags": ["conversion-tracking", "goals", "bidding-safety"],
+  "mcp_access": "read",
+  "platforms": ["claude-code", "claude"],
+  "author": "Kelpi (kelpi.ai)",
+  "page": "https://kelpi.ai/skills/google/conversion-tracking-checker"
+}

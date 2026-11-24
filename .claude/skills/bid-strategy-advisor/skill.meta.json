@@ -1,0 +1,12 @@
+{
+  "slug": "bid-strategy-advisor",
+  "name": "Bid Strategy Advisor",
+  "pillar": "Make the next call",
+  "order": 11,
+  "description": "Choose a Google Ads bidding approach from trusted goals, observed volume, conversion delay, and business targets, then draft an evaluation plan. Use before changing strategy, CPA, ROAS, or budget settings.",
+  "tags": ["bidding", "target-cpa", "smart-bidding"],
+  "mcp_access": "read",
+  "platforms": ["claude-code", "claude"],
+  "author": "Kelpi (kelpi.ai)",
+  "page": "https://kelpi.ai/skills/google/bid-strategy-advisor"
+}

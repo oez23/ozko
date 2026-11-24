@@ -1,0 +1,12 @@
+{
+  "slug": "search-intent-mapper",
+  "name": "Search Intent Mapper",
+  "pillar": "Match intent to the page",
+  "order": 7,
+  "description": "Group Google Ads queries by the answer each searcher needs, then map every cluster to one ad-group promise and a page that can support it. Use before adding keywords or restructuring Search.",
+  "tags": ["search-intent", "account-structure", "landing-pages"],
+  "mcp_access": "read",
+  "platforms": ["claude-code", "claude"],
+  "author": "Kelpi (kelpi.ai)",
+  "page": "https://kelpi.ai/skills/google/search-intent-mapper"
+}

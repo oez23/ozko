@@ -1,0 +1,12 @@
+{
+  "slug": "quality-score-fixer",
+  "name": "Quality Score Fixer",
+  "pillar": "Match intent to the page",
+  "order": 8,
+  "description": "Use Google Ads Quality Score components to find the weakest link behind a valuable keyword and draft the smallest useful test. Use when relevance, CTR, or landing-page experience may be holding Search back.",
+  "tags": ["quality-score", "ad-relevance", "landing-page"],
+  "mcp_access": "read",
+  "platforms": ["claude-code", "claude"],
+  "author": "Kelpi (kelpi.ai)",
+  "page": "https://kelpi.ai/skills/google/quality-score-fixer"
+}

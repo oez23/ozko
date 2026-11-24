@@ -1,0 +1,12 @@
+{
+  "slug": "delivery-troubleshooter",
+  "name": "Delivery Troubleshooter",
+  "pillar": "Read the account",
+  "order": 2,
+  "description": "Find why Google Ads delivery or reporting changed, separate observed blockers from possible causes, and put the checks in the right order. Use when impressions, clicks, spend, or conversions suddenly fall.",
+  "tags": ["delivery", "disapprovals", "troubleshooting"],
+  "mcp_access": "read",
+  "platforms": ["claude-code", "claude"],
+  "author": "Kelpi (kelpi.ai)",
+  "page": "https://kelpi.ai/skills/google/delivery-troubleshooter"
+}

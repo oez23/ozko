@@ -1,0 +1,12 @@
+{
+  "slug": "query-to-keyword-promoter",
+  "name": "Query to Keyword Promoter",
+  "pillar": "Work the search terms",
+  "order": 6,
+  "description": "Give proven search queries deliberate keyword, ad-group, and landing-page coverage without creating duplicates or mixing intent. Use after a search-term review finds real demand worth owning.",
+  "tags": ["keywords", "match-types", "query-coverage"],
+  "mcp_access": "read",
+  "platforms": ["claude-code", "claude"],
+  "author": "Kelpi (kelpi.ai)",
+  "page": "https://kelpi.ai/skills/google/query-to-keyword-promoter"
+}
