@@ -1,0 +1,16 @@
+{
+  "name": "ozko-immo",
+  "private": true,
+  "workspaces": [
+    "core",
+    "web"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w web",
+    "build": "npm run build -w web",
+    "test": "npm test -w core && npm test -w web",
+    "typecheck": "npm run typecheck -w core && npm run typecheck -w web",
+    "lint": "npm run lint -w web",
+    "db:migrate": "npm run db:migrate -w web"
+  }
+}
