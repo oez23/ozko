@@ -7,7 +7,7 @@ import type { Session } from "@/lib/auth";
 import { createBuyerRequest, createContact, getContact, listContacts, setBuyerRequestActive } from "@/lib/data/contacts";
 import { matchPropertiesForRequest, matchRequestsForProperty } from "@/lib/data/matching";
 import {
-  createProperty, getPriceHistory, getProperty, importProperties, listProperties, updateProperty, valueProperty,
+  createProperty, getComparables, getPriceHistory, getPropertiesByIds, getProperty, importProperties, listProperties, updateProperty, valueProperty,
 } from "@/lib/data/properties";
 import { ForbiddenError, NotFoundError } from "@/lib/errors";
 
@@ -16,7 +16,7 @@ async function member(orgId: string, orgName: string, role: Role): Promise<Sessi
   const email = `user${++seq}@test.invalid`;
   const [user] = await db.insert(users).values({ email, fullName: `User ${seq}`, passwordHash: "x" }).returning();
   await db.insert(memberships).values({ orgId, userId: user!.id, role });
-  return { userId: user!.id, orgId, role, fullName: user!.fullName, email, orgName };
+  return { userId: user!.id, orgId, role, fullName: user!.fullName, email, phone: null, orgName };
 }
 async function org(name: string) {
   const [created] = await db.insert(organizations).values({ name }).returning();
@@ -128,6 +128,18 @@ describe("matching", () => {
     });
     const [request] = await db.select().from(buyerRequests).where(eq(buyerRequests.id, requestId));
     expect((await matchPropertiesForRequest(agentA, request!)).map((m) => m.property.id)).toEqual([ownId]);
+  });
+});
+
+describe("pdf data", () => {
+  it("drops other offices' properties from a presentation and keeps the requested order", async () => {
+    const foreign = await createProperty(outsider, flat({ title: "Fremd" }));
+    const first = await createProperty(agentA, flat({ title: "Erstes", livingRooms: 1 }));
+    const second = await createProperty(agentB, flat({ title: "Zweites" }));
+    const result = await getPropertiesByIds(agentA, [second, foreign, first]);
+    expect(result.map((p) => p.title)).toEqual(["Zweites", "Erstes"]);
+    expect(result[1]?.livingRooms).toBe(1);
+    expect(await getComparables(outsider, [first, second])).toEqual([]);
   });
 });
 

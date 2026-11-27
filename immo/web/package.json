@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@immo/core": "*",
+    "@react-pdf/renderer": "^4.9.2",
     "drizzle-orm": "^0.45.4",
     "next": "16.4.6",
     "pg": "^8.23.1",

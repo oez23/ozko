@@ -22,6 +22,7 @@ export type Session = {
   role: Role;
   fullName: string;
   email: string;
+  phone: string | null;
   orgName: string;
 };
 
@@ -60,6 +61,7 @@ export async function resolveSessionToken(token: string): Promise<Session | null
       role: memberships.role,
       fullName: users.fullName,
       email: users.email,
+      phone: users.phone,
       orgName: organizations.name,
     })
     .from(sessions)

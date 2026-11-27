@@ -3,7 +3,7 @@ import {
   bigint, boolean, date, doublePrecision, index, integer, jsonb, pgEnum, pgTable, primaryKey, text, timestamp,
   uniqueIndex, uuid,
 } from "drizzle-orm/pg-core";
-import { CONTACT_KINDS, CURRENCIES, DEAL_TYPES, PROPERTY_STATUSES, PROPERTY_TYPES, ROLES } from "@immo/core";
+import { CONTACT_KINDS, CURRENCIES, DEAL_TYPES, DEFAULT_CURRENCY, PROPERTY_STATUSES, PROPERTY_TYPES, ROLES } from "@immo/core";
 
 export const roleEnum = pgEnum("role", ROLES);
 export const dealTypeEnum = pgEnum("deal_type", DEAL_TYPES);
@@ -28,6 +28,7 @@ export const users = pgTable(
     id: id(),
     email: text("email").notNull(),
     fullName: text("full_name").notNull(),
+    phone: text("phone"),
     passwordHash: text("password_hash").notNull(),
     createdAt: createdAt(),
   },
@@ -97,7 +98,7 @@ export const properties = pgTable(
     propertyType: propertyTypeEnum("property_type").notNull(),
     status: propertyStatusEnum("status").notNull().default("active"),
     price: bigint("price", { mode: "number" }).notNull(),
-    currency: currencyEnum("currency").notNull().default("EUR"),
+    currency: currencyEnum("currency").notNull().default(DEFAULT_CURRENCY),
     city: text("city").notNull(),
     /** Normalised city, see placeKey(); filters and matching compare on this. */
     cityKey: text("city_key").notNull(),
@@ -105,6 +106,7 @@ export const properties = pgTable(
     address: text("address"),
     areaSqm: doublePrecision("area_sqm"),
     rooms: doublePrecision("rooms"),
+    livingRooms: integer("living_rooms"),
     bathrooms: integer("bathrooms"),
     floor: integer("floor"),
     yearBuilt: integer("year_built"),
@@ -144,7 +146,7 @@ export const buyerRequests = pgTable(
     city: text("city").notNull(),
     cityKey: text("city_key").notNull(),
     districts: text("districts").array().notNull().default(sql`'{}'::text[]`),
-    currency: currencyEnum("currency").notNull().default("EUR"),
+    currency: currencyEnum("currency").notNull().default(DEFAULT_CURRENCY),
     minPrice: bigint("min_price", { mode: "number" }),
     maxPrice: bigint("max_price", { mode: "number" }),
     minAreaSqm: doublePrecision("min_area_sqm"),

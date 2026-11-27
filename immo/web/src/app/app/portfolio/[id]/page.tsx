@@ -3,20 +3,21 @@ import Link from "next/link";
 import { MIN_COMPARABLES } from "@immo/core";
 import { MatchSummary } from "@/components/match";
 import { Badge, Card, LinkButton, PageHeader } from "@/components/ui";
+import { fill } from "@/i18n";
+import { getI18n } from "@/i18n/server";
 import { requireSession } from "@/lib/auth";
 import { matchRequestsForProperty } from "@/lib/data/matching";
 import { getPriceHistory, getProperty, valueProperty } from "@/lib/data/properties";
-import {
-  DEAL_TYPE_LABELS, formatDate, formatNumber, formatPrice, PROPERTY_TYPE_LABELS, STATUS_LABELS,
-} from "@/lib/labels";
 import { orNotFound, uuidParam } from "@/lib/params";
 
-export const metadata: Metadata = { title: "Objekt" };
-
-const CONFIDENCE_LABELS = { low: "niedrig", medium: "mittel", high: "hoch" } as const;
+export async function generateMetadata(): Promise<Metadata> {
+  return { title: (await getI18n()).m.property.pageTitle };
+}
 
 export default async function PropertyPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await requireSession();
+  const { m, f } = await getI18n();
+  const t = m.property;
   const id = uuidParam((await params).id);
   const { property: p, agentName, canEdit } = await orNotFound(getProperty(session, id));
   const [matches, history, valuation] = await Promise.all([
@@ -25,33 +26,34 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
     valueProperty(session, p),
   ]);
 
+  const dash = "–";
   const facts: [string, string][] = [
-    ["Objektart", PROPERTY_TYPE_LABELS[p.propertyType]],
-    ["Vermarktung", DEAL_TYPE_LABELS[p.dealType]],
-    ["Lage", [p.city, p.district].filter(Boolean).join(", ")],
-    ["Adresse", p.address ?? "–"],
-    ["Fläche", p.areaSqm ? `${formatNumber(p.areaSqm)} m²` : "–"],
-    ["Zimmer", p.rooms != null ? formatNumber(p.rooms) : "–"],
-    ["Bäder", p.bathrooms != null ? String(p.bathrooms) : "–"],
-    ["Etage", p.floor != null ? String(p.floor) : "–"],
-    ["Baujahr", p.yearBuilt != null ? String(p.yearBuilt) : "–"],
-    ["Auftrag endet", p.mandateEndsOn ? formatDate(p.mandateEndsOn) : "–"],
-    ["Makler", agentName],
+    [t.propertyType, m.enums.propertyType[p.propertyType]],
+    [t.dealType, m.enums.dealType[p.dealType]],
+    [t.location, [p.city, p.district].filter(Boolean).join(", ")],
+    [t.address, p.address ?? dash],
+    [t.area, f.area(p.areaSqm)],
+    [t.roomsDisplay, f.rooms(p.rooms, p.livingRooms)],
+    [t.bathrooms, p.bathrooms != null ? String(p.bathrooms) : dash],
+    [t.floor, p.floor != null ? String(p.floor) : dash],
+    [t.yearBuilt, p.yearBuilt != null ? String(p.yearBuilt) : dash],
+    [t.mandateEndsOn, p.mandateEndsOn ? f.date(p.mandateEndsOn) : dash],
+    [t.agent, agentName],
   ];
+  const perSqm = p.areaSqm ? ` · ${f.price(Math.round(p.price / p.areaSqm), p.currency)}${m.common.perSqm}` : "";
 
   return (
     <>
-      <PageHeader title={p.title}
-        subtitle={`${formatPrice(p.price, p.currency)}${p.areaSqm ? ` · ${formatPrice(Math.round(p.price / p.areaSqm), p.currency)}/m²` : ""}`}
+      <PageHeader title={p.title} subtitle={`${f.price(p.price, p.currency)}${perSqm}`}
         action={
           <div className="flex items-center gap-3">
-            <Badge tone={p.status === "active" ? "brand" : "neutral"}>{STATUS_LABELS[p.status]}</Badge>
-            {canEdit ? <LinkButton href={`/app/portfolio/${id}/edit`} variant="secondary">Bearbeiten</LinkButton> : null}
+            <Badge tone={p.status === "active" ? "brand" : "neutral"}>{m.enums.status[p.status]}</Badge>
+            {canEdit ? <LinkButton href={`/app/portfolio/${id}/edit`} variant="secondary">{m.common.edit}</LinkButton> : null}
           </div>
         } />
       <div className="grid gap-5 lg:grid-cols-3">
         <div className="flex flex-col gap-5 lg:col-span-2">
-          <Card title="Eckdaten">
+          <Card title={t.facts}>
             <dl className="grid grid-cols-2 gap-x-6 gap-y-3 text-sm sm:grid-cols-3">
               {facts.map(([label, value]) => (
                 <div key={label}>
@@ -62,21 +64,19 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
             </dl>
             {p.description ? <p className="mt-5 border-t border-line pt-4 text-sm whitespace-pre-line">{p.description}</p> : null}
           </Card>
-          <Card title={`Passende Suchaufträge (${matches.length})`}>
+          <Card title={fill(t.matchesTitle, { count: matches.length })}>
             {matches.length === 0 ? (
-              <p className="text-sm text-muted">
-                {p.status === "active" ? "Aktuell kein passender Suchauftrag im Büro." : "Matching läuft nur für aktive Objekte."}
-              </p>
+              <p className="text-sm text-muted">{p.status === "active" ? t.noMatches : t.matchesInactive}</p>
             ) : (
               <ul className="divide-y divide-line">
-                {matches.map((m) => (
-                  <li key={m.requestId} className="flex flex-col gap-2 py-3 text-sm">
-                    {m.contact ? (
-                      <Link href={`/app/contacts/${m.contact.id}`} className="font-medium text-brand underline">{m.contact.fullName}</Link>
+                {matches.map((match) => (
+                  <li key={match.requestId} className="flex flex-col gap-2 py-3 text-sm">
+                    {match.contact ? (
+                      <Link href={`/app/contacts/${match.contact.id}`} className="font-medium text-brand underline">{match.contact.fullName}</Link>
                     ) : (
-                      <span className="font-medium">Kunde von {m.agentName}</span>
+                      <span className="font-medium">{fill(t.colleagueCustomer, { agent: match.agentName })}</span>
                     )}
-                    <MatchSummary match={m.match} />
+                    <MatchSummary match={match.match} m={m} />
                   </li>
                 ))}
               </ul>
@@ -84,32 +84,38 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
           </Card>
         </div>
         <div className="flex flex-col gap-5">
-          <Card title="Marktwert-Einschätzung">
+          <Card title={t.valuationTitle}>
             {valuation.ok ? (
               <div className="text-sm">
-                <p className="text-2xl font-semibold tabular-nums">{formatPrice(valuation.estimate.mid, p.currency)}</p>
+                <p className="text-2xl font-semibold tabular-nums">{f.price(valuation.estimate.mid, p.currency)}</p>
                 <p className="mt-1 text-muted tabular-nums">
-                  Spanne {formatPrice(valuation.estimate.low, p.currency)} – {formatPrice(valuation.estimate.high, p.currency)}
+                  {fill(t.valuationRange, {
+                    low: f.price(valuation.estimate.low, p.currency), high: f.price(valuation.estimate.high, p.currency),
+                  })}
                 </p>
                 <p className="mt-3 text-muted">
-                  Median {formatPrice(valuation.pricePerSqm.median, p.currency)}/m² aus {valuation.comparablesUsed} Vergleichsobjekten
-                  des Büros · Aussagekraft {CONFIDENCE_LABELS[valuation.confidence]}
+                  {fill(t.valuationBasis, {
+                    median: f.price(valuation.pricePerSqm.median, p.currency), count: valuation.comparablesUsed,
+                    confidence: m.enums.confidence[valuation.confidence],
+                  })}
                 </p>
               </div>
             ) : (
               <p className="text-sm text-muted">
                 {valuation.reason === "missing_area"
-                  ? "Für eine Einschätzung fehlt die Fläche des Objekts."
-                  : `Zu wenige Vergleichsobjekte: ${valuation.comparablesUsed} von mindestens ${MIN_COMPARABLES} (gleiche Art, Stadt, Währung, ähnliche Fläche).`}
+                  ? t.valuationMissingArea
+                  : fill(t.valuationTooFew, { count: valuation.comparablesUsed, min: MIN_COMPARABLES })}
               </p>
             )}
+            <a href={`/app/portfolio/${id}/report.pdf`} target="_blank" rel="noopener"
+              className="mt-4 inline-block text-sm font-medium text-brand underline">{t.report}</a>
           </Card>
-          <Card title="Preis- und Statusverlauf">
+          <Card title={t.historyTitle}>
             <ol className="flex flex-col gap-2 text-sm">
               {history.map((h, i) => (
                 <li key={i} className="flex items-center justify-between gap-3">
-                  <span className="text-muted tabular-nums">{formatDate(h.createdAt)}</span>
-                  <span className="tabular-nums">{formatPrice(h.price, p.currency)} · {STATUS_LABELS[h.status]}</span>
+                  <span className="text-muted tabular-nums">{f.date(h.createdAt)}</span>
+                  <span className="tabular-nums">{f.price(h.price, p.currency)} · {m.enums.status[h.status]}</span>
                 </li>
               ))}
             </ol>

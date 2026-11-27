@@ -1,4 +1,5 @@
-import { propertyInputSchema, type PropertyInput } from "./domain";
+import type { z } from "zod";
+import { placeKey, propertyInputSchema, type PropertyInput } from "./domain";
 
 export const MAX_IMPORT_ROWS = 2000;
 
@@ -42,45 +43,59 @@ export function parseCsv(input: string): string[][] {
   return rows.filter((r) => r.some((cell) => cell.trim() !== ""));
 }
 
+/**
+ * Headers and enum values are compared through placeKey(), so "İşlem", "ISLEM" and "işlem"
+ * are the same column. Plain toLowerCase() turns "İ" into "i" plus a combining dot and
+ * "I" into "i" instead of "ı", which silently broke Turkish files.
+ * Aliases are therefore written in their normalised form: lower case, no diacritics.
+ */
 const COLUMN_ALIASES: Record<keyof PropertyInput, string[]> = {
-  title: ["title", "titel", "baslik", "başlık"],
-  dealType: ["dealtype", "deal_type", "vermarktung", "islem", "işlem"],
+  title: ["title", "titel", "baslik", "ilan basligi"],
+  dealType: ["dealtype", "deal_type", "vermarktung", "islem", "islem turu"],
   propertyType: ["propertytype", "property_type", "objektart", "tip", "emlak tipi"],
   status: ["status", "durum"],
   price: ["price", "preis", "fiyat"],
-  currency: ["currency", "waehrung", "währung", "para birimi"],
-  city: ["city", "stadt", "il", "sehir", "şehir"],
-  district: ["district", "stadtteil", "ilce", "ilçe"],
+  currency: ["currency", "wahrung", "waehrung", "para birimi"],
+  city: ["city", "stadt", "il", "sehir"],
+  district: ["district", "stadtteil", "bezirk", "ilce"],
   address: ["address", "adresse", "adres"],
-  areaSqm: ["areasqm", "area", "flaeche", "fläche", "m2", "metrekare"],
-  rooms: ["rooms", "zimmer", "oda"],
-  bathrooms: ["bathrooms", "baeder", "bäder", "banyo"],
+  areaSqm: ["areasqm", "area", "flache", "flaeche", "m2", "metrekare", "alan"],
+  rooms: ["rooms", "zimmer", "oda", "oda sayisi"],
+  livingRooms: ["livingrooms", "wohnzimmer", "salon"],
+  bathrooms: ["bathrooms", "bader", "baeder", "banyo"],
   floor: ["floor", "etage", "kat"],
-  yearBuilt: ["yearbuilt", "baujahr", "yapim yili", "yapım yılı"],
-  description: ["description", "beschreibung", "aciklama", "açıklama"],
+  yearBuilt: ["yearbuilt", "baujahr", "yapim yili"],
+  description: ["description", "beschreibung", "aciklama"],
   ownerContactId: ["ownercontactid"],
-  mandateEndsOn: ["mandateendson", "mandat bis", "sozlesme bitis", "sözleşme bitiş"],
+  mandateEndsOn: ["mandateendson", "mandat bis", "sozlesme bitis", "yetki bitis"],
 };
 
 const VALUE_ALIASES: Partial<Record<keyof PropertyInput, Record<string, string>>> = {
-  dealType: { kauf: "sale", verkauf: "sale", satilik: "sale", satılık: "sale", miete: "rent", kiralik: "rent", kiralık: "rent" },
+  dealType: { kauf: "sale", verkauf: "sale", satilik: "sale", miete: "rent", kiralik: "rent" },
   propertyType: {
-    wohnung: "apartment", daire: "apartment", haus: "house", ev: "house", mustakil: "house", müstakil: "house",
-    grundstueck: "land", grundstück: "land", arsa: "land", gewerbe: "commercial", ticari: "commercial", isyeri: "commercial", işyeri: "commercial",
+    wohnung: "apartment", daire: "apartment", haus: "house", ev: "house", mustakil: "house", "mustakil ev": "house",
+    grundstuck: "land", grundstueck: "land", arsa: "land", gewerbe: "commercial", ticari: "commercial", isyeri: "commercial",
   },
-  status: { entwurf: "draft", aktiv: "active", aktif: "active", reserviert: "reserved", verkauft: "closed", satildi: "closed", satıldı: "closed" },
+  status: {
+    entwurf: "draft", taslak: "draft", aktiv: "active", aktif: "active", reserviert: "reserved", opsiyonlu: "reserved",
+    verkauft: "closed", satildi: "closed", kiralandi: "closed", tamamlandi: "closed",
+  },
 };
 
-export type ImportError = { line: number; message: string };
+/** Codes instead of prose so each client renders them in its own language. */
+export type ImportError =
+  | { line: 1; code: "empty_file" | "too_many_rows" }
+  | { line: 1; code: "missing_columns"; columns: string[] }
+  | { line: number; code: "invalid_row"; field: string; issue: z.core.$ZodIssue };
 export type ImportResult = { rows: PropertyInput[]; errors: ImportError[]; unknownColumns: string[] };
 
 export function parsePropertyCsv(input: string): ImportResult {
   const table = parseCsv(input);
   const [header, ...body] = table;
-  if (!header) return { rows: [], errors: [{ line: 1, message: "Datei ist leer" }], unknownColumns: [] };
+  if (!header) return { rows: [], errors: [{ line: 1, code: "empty_file" }], unknownColumns: [] };
 
   const columns = header.map((raw) => {
-    const name = raw.trim().toLowerCase();
+    const name = placeKey(raw);
     const hit = (Object.entries(COLUMN_ALIASES) as [keyof PropertyInput, string[]][]).find(([, aliases]) =>
       aliases.includes(name),
     );
@@ -89,10 +104,10 @@ export function parsePropertyCsv(input: string): ImportResult {
   const unknownColumns = header.filter((_, i) => columns[i] === null).map((h) => h.trim());
   const missing = (["title", "dealType", "propertyType", "price", "city"] as const).filter((c) => !columns.includes(c));
   if (missing.length > 0) {
-    return { rows: [], errors: [{ line: 1, message: `Pflichtspalten fehlen: ${missing.join(", ")}` }], unknownColumns };
+    return { rows: [], errors: [{ line: 1, code: "missing_columns", columns: missing }], unknownColumns };
   }
   if (body.length > MAX_IMPORT_ROWS) {
-    return { rows: [], errors: [{ line: 1, message: `Maximal ${MAX_IMPORT_ROWS} Zeilen pro Import` }], unknownColumns };
+    return { rows: [], errors: [{ line: 1, code: "too_many_rows" }], unknownColumns };
   }
 
   const rows: PropertyInput[] = [];
@@ -102,14 +117,19 @@ export function parsePropertyCsv(input: string): ImportResult {
     columns.forEach((column, i) => {
       if (!column) return;
       const value = (cells[i] ?? "").trim();
-      record[column] = VALUE_ALIASES[column]?.[value.toLowerCase()] ?? value;
+      record[column] = VALUE_ALIASES[column]?.[placeKey(value)] ?? value;
     });
     if (record.price) record.price = record.price.replace(/[\s.](?=\d{3}\b)/g, "");
+    const roomsPlus = record.rooms?.match(/^(\d+(?:[.,]5)?)\s*\+\s*(\d+)$/);
+    if (roomsPlus) {
+      record.rooms = roomsPlus[1]!.replace(",", ".");
+      record.livingRooms = roomsPlus[2]!;
+    }
     const parsed = propertyInputSchema.safeParse(record);
     if (parsed.success) rows.push(parsed.data);
     else {
       const issue = parsed.error.issues[0]!;
-      errors.push({ line: index + 2, message: `${issue.path.join(".")}: ${issue.message}` });
+      errors.push({ line: index + 2, code: "invalid_row", field: String(issue.path[0] ?? ""), issue });
     }
   });
   return { rows, errors, unknownColumns };

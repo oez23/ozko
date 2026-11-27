@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  buyerRequestInputSchema, canAccessContact, canEditProperty, estimateValue, parseCsv, parsePropertyCsv,
+  buyerRequestInputSchema, canAccessContact, formatRooms, canEditProperty, estimateValue, parseCsv, parsePropertyCsv,
   placeKey, propertyInputSchema, rankMatches, scoreMatch, type MatchProperty, type MatchRequest,
 } from "./index";
 
@@ -18,6 +18,15 @@ describe("placeKey", () => {
     expect(placeKey("İzmir")).toBe(placeKey("izmir"));
     expect(placeKey("ISPARTA")).toBe(placeKey("ısparta"));
     expect(placeKey(" Karşıyaka ")).toBe("karsiyaka");
+  });
+});
+
+describe("formatRooms", () => {
+  it("uses the Turkish room+living-room notation when both are known", () => {
+    expect(formatRooms(3, 1)).toBe("3+1");
+    expect(formatRooms(1, 0)).toBe("1+0");
+    expect(formatRooms(2.5, null)).toBe("2.5");
+    expect(formatRooms(null, 1)).toBeNull();
   });
 });
 
@@ -90,7 +99,7 @@ describe("schemas", () => {
       title: "Helle Wohnung", dealType: "sale", propertyType: "apartment", price: "250000", city: "Berlin",
       status: "", currency: "", district: "", areaSqm: "", rooms: "2.5",
     });
-    expect(parsed).toMatchObject({ status: "active", currency: "EUR", price: 250000, rooms: 2.5 });
+    expect(parsed).toMatchObject({ status: "active", currency: "TRY", price: 250000, rooms: 2.5 });
     expect(parsed.district).toBeUndefined();
     expect(parsed.areaSqm).toBeUndefined();
   });
@@ -105,6 +114,7 @@ describe("schemas", () => {
       city: "Berlin", minPrice: 500, maxPrice: 100,
     });
     expect(result.success).toBe(false);
+    expect(result.error?.issues[0]).toMatchObject({ code: "custom", message: "min_over_max_price", path: ["maxPrice"] });
   });
 });
 
@@ -117,7 +127,7 @@ describe("csv import", () => {
       "Titel;Vermarktung;Objektart;Preis;Stadt;Zimmer;Extra",
       "Wohnung am Park;Kauf;Wohnung;250.000;Berlin;3;x",
       "Zu kurz;Kauf;Wohnung;abc;Berlin;3;x",
-      "Deniz manzaralı daire;satılık;daire;4 500 000;İzmir;;x",
+      "Deniz manzaralı daire;satılık;daire;4 500 000;İzmir;3+1;x",
     ].join("\n");
     const result = parsePropertyCsv(csv);
     expect(result.unknownColumns).toEqual(["Extra"]);
@@ -125,11 +135,30 @@ describe("csv import", () => {
       ["Wohnung am Park", "sale", "apartment", 250000],
       ["Deniz manzaralı daire", "sale", "apartment", 4500000],
     ]);
+    expect(result.rows.map((r) => [r.rooms, r.livingRooms])).toEqual([[3, undefined], [3, 1]]);
     expect(result.errors).toHaveLength(1);
-    expect(result.errors[0]).toMatchObject({ line: 3 });
+    expect(result.errors[0]).toMatchObject({ line: 3, code: "invalid_row", field: "price" });
+  });
+  it("recognises Turkish headers and values whatever their letter case", () => {
+    // toLowerCase() maps "İ" to "i̇" and "I" to "i", so these exact spellings used to be rejected.
+    const csv = [
+      "BAŞLIK;İŞLEM;TİP;FİYAT;İL;İLÇE;DURUM",
+      "Site içinde daire;SATILIK;DAİRE;4500000;İzmir;Karşıyaka;AKTİF",
+      "Kiralık işyeri;Kiralık;İşyeri;60000;İstanbul;Kadıköy;Opsiyonlu",
+    ].join("\n");
+    const result = parsePropertyCsv(csv);
+    expect(result.errors).toEqual([]);
+    expect(result.unknownColumns).toEqual([]);
+    expect(result.rows.map((r) => [r.dealType, r.propertyType, r.status, r.city, r.district])).toEqual([
+      ["sale", "apartment", "active", "İzmir", "Karşıyaka"],
+      ["rent", "commercial", "reserved", "İstanbul", "Kadıköy"],
+    ]);
   });
   it("fails fast when required columns are missing", () => {
-    expect(parsePropertyCsv("Titel;Preis\nA;1").errors[0]?.message).toContain("dealType");
+    expect(parsePropertyCsv("Titel;Preis\nA;1").errors[0]).toEqual({
+      line: 1, code: "missing_columns", columns: ["dealType", "propertyType", "city"],
+    });
+    expect(parsePropertyCsv("").errors[0]).toEqual({ line: 1, code: "empty_file" });
   });
 });
 

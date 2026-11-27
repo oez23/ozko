@@ -10,7 +10,9 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // Every screen is per-user and per-tenant, so there is no static shell worth caching.
   transpilePackages: ["@immo/core"],
-  serverExternalPackages: ["pg"],
+  serverExternalPackages: ["pg", "@react-pdf/renderer"],
+  // The PDF fonts are read from disk at runtime, so they must be traced into the deployment.
+  outputFileTracingIncludes: { "/app/**/*.pdf": ["./assets/fonts/*"] },
   turbopack: {
     rules: {
       "*.css": { loaders: ["@tailwindcss/turbopack"], as: "*.css" },

@@ -3,9 +3,11 @@ import { NotFoundError } from "./errors";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
+export const isUuid = (value: string): boolean => UUID.test(value);
+
 /** Rejects malformed ids before they reach Postgres, where a bad uuid would raise a 500. */
 export function uuidParam(value: string): string {
-  if (!UUID.test(value)) notFound();
+  if (!isUuid(value)) notFound();
   return value;
 }
 

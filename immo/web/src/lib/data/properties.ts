@@ -88,6 +88,7 @@ const toRow = (input: PropertyInput) => ({
   address: input.address ?? null,
   areaSqm: input.areaSqm ?? null,
   rooms: input.rooms ?? null,
+  livingRooms: input.livingRooms ?? null,
   bathrooms: input.bathrooms ?? null,
   floor: input.floor ?? null,
   yearBuilt: input.yearBuilt ?? null,
@@ -196,4 +197,28 @@ export async function countByStatus(session: Session) {
     .from(properties)
     .where(eq(properties.orgId, session.orgId))
     .groupBy(properties.status);
+}
+
+/** Properties for a buyer presentation, in the order requested; ids from other offices are silently dropped. */
+export async function getPropertiesByIds(session: Session, ids: string[]): Promise<Property[]> {
+  if (ids.length === 0) return [];
+  const rows = await db
+    .select()
+    .from(properties)
+    .where(and(eq(properties.orgId, session.orgId), inArray(properties.id, ids)));
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  return ids.flatMap((id) => byId.get(id) ?? []);
+}
+
+/** The comparables behind a valuation, for the market report. */
+export async function getComparables(session: Session, ids: string[]) {
+  if (ids.length === 0) return [];
+  return db
+    .select({
+      id: properties.id, title: properties.title, district: properties.district, price: properties.price,
+      areaSqm: properties.areaSqm, status: properties.status,
+    })
+    .from(properties)
+    .where(and(eq(properties.orgId, session.orgId), inArray(properties.id, ids)))
+    .orderBy(properties.price);
 }
