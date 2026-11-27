@@ -24,6 +24,8 @@ const blank = (v: unknown) => (v === "" || v === null || v === undefined ? undef
 const optional = <T extends z.ZodType>(schema: T) => z.preprocess(blank, schema.optional());
 
 const text = (max: number) => z.string().trim().min(1).max(max);
+/** Checkboxes arrive as "on" from forms and as booleans from JSON clients; absent means unchecked. */
+const flag = z.preprocess((v) => v === true || v === "on" || v === "true", z.boolean());
 const isoDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 export const propertyInputSchema = z.object({
@@ -46,6 +48,8 @@ export const propertyInputSchema = z.object({
   description: optional(z.string().trim().max(5000)),
   ownerContactId: optional(z.uuid()),
   mandateEndsOn: optional(isoDate),
+  /** Opt-in: lets agents of other offices find this listing for their buyers. */
+  sharedWithNetwork: flag,
 });
 export type PropertyInput = z.infer<typeof propertyInputSchema>;
 
@@ -72,6 +76,8 @@ export const buyerRequestInputSchema = z
     maxAreaSqm: optional(z.coerce.number().positive()),
     minRooms: optional(z.coerce.number().min(0).max(50)),
     notes: optional(z.string().trim().max(2000)),
+    /** Opt-in: tells other offices that a matching buyer exists, never who the buyer is. */
+    sharedWithNetwork: flag,
   })
   .refine((r) => r.minPrice === undefined || r.maxPrice === undefined || r.minPrice <= r.maxPrice, {
     message: "min_over_max_price",

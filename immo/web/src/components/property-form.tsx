@@ -9,7 +9,7 @@ import { Alert, Button, Field, Input, LinkButton, Select, Textarea } from "./ui"
 export type PropertyFormValues = Partial<Record<
   "title" | "dealType" | "propertyType" | "status" | "price" | "currency" | "city" | "district" | "address" |
   "areaSqm" | "rooms" | "livingRooms" | "bathrooms" | "floor" | "yearBuilt" | "description" | "ownerContactId" |
-  "mandateEndsOn",
+  "mandateEndsOn" | "sharedWithNetwork",
   string
 >>;
 
@@ -101,6 +101,14 @@ export function PropertyForm({ id, values: initial = {}, contacts }: {
           </Field>
         </div>
       </div>
+      <label className="flex items-start gap-3 rounded-md border border-line bg-canvas p-4 text-sm">
+        <input type="checkbox" name="sharedWithNetwork" className="mt-0.5 size-4 accent-brand"
+          defaultChecked={values.sharedWithNetwork === "true" || values.sharedWithNetwork === "on"} />
+        <span>
+          <span className="font-medium">{m.network.shareProperty}</span>
+          <span className="mt-1 block text-xs text-muted">{m.network.sharePropertyHint}</span>
+        </span>
+      </label>
       <div className="flex gap-3">
         <Button type="submit" disabled={pending}>{pending ? m.common.saving : m.common.save}</Button>
         <LinkButton href={id ? `/app/portfolio/${id}` : "/app/portfolio"} variant="secondary">{m.common.cancel}</LinkButton>

@@ -39,6 +39,17 @@ Die Integrationstests leeren die Test-Datenbank. `TEST_DATABASE_URL` darf nie au
 - **Inhaber / Büroleitung**: sehen und bearbeiten alle Objekte und Kontakte des Büros.
 - **Makler**: sieht alle Objekte des Büros, bearbeitet nur eigene. Sieht nur eigene Kontakte; bei Treffern auf Suchaufträge von Kollegen erscheint nur „Kunde von …", nie der Name.
 
+## Matching und Netzwerk
+
+Matching ist der Kern: `core/src/matching.ts` bewertet Objekt gegen Suchauftrag (0–100), `web/src/lib/data/matching.ts` liefert die Kandidaten.
+
+- **Im Büro:** alle aktiven Objekte gegen alle aktiven Suchaufträge. Kollegen sehen bei fremden Kunden nur „Kunde von …".
+- **Büroübergreifend (Netzwerk):** nur nach ausdrücklicher Freigabe je Objekt bzw. je Suchauftrag, standardmäßig aus.
+  - Ein freigegebenes, aktives Objekt erscheint bei passenden Suchaufträgen anderer Büros – ausschließlich mit den Spalten aus `PUBLIC_PROPERTY_COLUMNS` plus Name, Telefon und Büro des Maklers. Adresse, Eigentümer und Auftragsende verlassen das Büro nie.
+  - Ein freigegebener Suchauftrag wird dem Büro eines passenden, ebenfalls freigegebenen Objekts nur als „Makler X von Büro Y hat einen Käufer" angezeigt. Kundendaten werden nie geteilt.
+- **Treffer-Postfach** (`/app/matches`): alle Treffer für die eigenen Käufer, „neu" seit dem letzten Abhaken, einzeln als unpassend ausblendbar.
+- **Versand an den Kunden:** öffentlicher Link `/p/<token>` (30 Tage, widerrufbar, Aufrufzähler, nicht indexierbar) oder PDF. Enthalten sind nur eigene Objekte des Büros; der Kundenname steht nicht auf der Seite.
+
 ## Markt-Besonderheiten
 
 - Standardwährung TRY; Beträge sind ganze Zahlen ohne Umrechnung zwischen Währungen.
@@ -47,8 +58,8 @@ Die Integrationstests leeren die Test-Datenbank. `TEST_DATABASE_URL` darf nie au
 
 ## Stand
 
-Fertig und getestet: Registrierung/Login, Mandantentrennung, Portfolio (Liste, Filter, Detail, Formular, CSV-Import, Preisverlauf), Kunden, Suchaufträge, Matching in beide Richtungen, Marktwert-Einschätzung aus eigenen Vergleichsobjekten, Käuferpräsentation und Marktanalyse als PDF, Profil mit Telefonnummer, Sprachumschaltung TR/DE, Audit-Log.
+Fertig und getestet: Registrierung/Login, Mandantentrennung, Treffer-Postfach, Netzwerk-Matching, Versandlinks, Portfolio (Liste, Filter, Detail, Formular, CSV-Import, Preisverlauf), Kunden, Suchaufträge, Matching in beide Richtungen, Marktwert-Einschätzung aus eigenen Vergleichsobjekten, Käuferpräsentation und Marktanalyse als PDF, Profil mit Telefonnummer, Sprachumschaltung TR/DE, Audit-Log.
 
-Offen: Expo-App mit API, Team-Einladungen, Passwort-Reset, Objektfotos und Bürologo (brauchen Dateispeicher), Abos/Zahlung, KVKK-Funktionen (Aydınlatma, Auskunft, Löschung), Begrenzung der PDF-Erzeugung pro Nutzer.
+Offen: Portal-Inserate als Datenquelle (nur mit Lizenz), Benachrichtigungen per Push/SMS/E-Mail, Expo-App mit API, Team-Einladungen, Passwort-Reset, Objektfotos und Bürologo (brauchen Dateispeicher), Abos/Zahlung, KVKK-Funktionen (Aydınlatma, Auskunft, Löschung), Begrenzung der PDF-Erzeugung pro Nutzer.
 
 Bekannt: `npm audit` meldet 4 mittlere Funde in `drizzle-kit` (nur Entwicklungswerkzeug, nicht im Produktions-Build).

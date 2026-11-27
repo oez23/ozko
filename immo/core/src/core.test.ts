@@ -103,6 +103,13 @@ describe("schemas", () => {
     expect(parsed.district).toBeUndefined();
     expect(parsed.areaSqm).toBeUndefined();
   });
+  it("shares with the network only on an explicit opt-in", () => {
+    const base = { title: "Daire", dealType: "sale", propertyType: "apartment", price: 1, city: "İzmir" };
+    expect(propertyInputSchema.parse(base).sharedWithNetwork).toBe(false);
+    expect(propertyInputSchema.parse({ ...base, sharedWithNetwork: "" }).sharedWithNetwork).toBe(false);
+    expect(propertyInputSchema.parse({ ...base, sharedWithNetwork: "on" }).sharedWithNetwork).toBe(true);
+    expect(propertyInputSchema.parse({ ...base, sharedWithNetwork: true }).sharedWithNetwork).toBe(true);
+  });
   it("rejects non-positive and fractional prices", () => {
     const base = { title: "Wohnung", dealType: "sale", propertyType: "apartment", city: "Berlin" };
     expect(propertyInputSchema.safeParse({ ...base, price: 0 }).success).toBe(false);

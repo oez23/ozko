@@ -68,6 +68,8 @@ const COLUMN_ALIASES: Record<keyof PropertyInput, string[]> = {
   description: ["description", "beschreibung", "aciklama"],
   ownerContactId: ["ownercontactid"],
   mandateEndsOn: ["mandateendson", "mandat bis", "sozlesme bitis", "yetki bitis"],
+  // Sharing with other offices is a deliberate per-listing decision, never something a bulk file switches on.
+  sharedWithNetwork: [],
 };
 
 const VALUE_ALIASES: Partial<Record<keyof PropertyInput, Record<string, string>>> = {

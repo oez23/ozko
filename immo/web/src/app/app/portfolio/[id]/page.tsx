@@ -48,6 +48,7 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
         action={
           <div className="flex items-center gap-3">
             <Badge tone={p.status === "active" ? "brand" : "neutral"}>{m.enums.status[p.status]}</Badge>
+            {p.sharedWithNetwork ? <Badge>{m.network.shareProperty}</Badge> : null}
             {canEdit ? <LinkButton href={`/app/portfolio/${id}/edit`} variant="secondary">{m.common.edit}</LinkButton> : null}
           </div>
         } />
@@ -73,6 +74,11 @@ export default async function PropertyPage({ params }: { params: Promise<{ id: s
                   <li key={match.requestId} className="flex flex-col gap-2 py-3 text-sm">
                     {match.contact ? (
                       <Link href={`/app/contacts/${match.contact.id}`} className="font-medium text-brand underline">{match.contact.fullName}</Link>
+                    ) : match.network ? (
+                      <span className="font-medium">
+                        {fill(m.network.buyerAt, { agent: match.network.agentName, office: match.network.orgName })}
+                        {match.network.agentPhone ? ` · ${match.network.agentPhone}` : ""}
+                      </span>
                     ) : (
                       <span className="font-medium">{fill(t.colleagueCustomer, { agent: match.agentName })}</span>
                     )}

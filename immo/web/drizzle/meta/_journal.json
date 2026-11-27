@@ -15,6 +15,13 @@
       "when": 1795787759134,
       "tag": "0001_pale_robbie_robertson",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795790481440,
+      "tag": "0002_mysterious_stingray",
+      "breakpoints": true
     }
   ]
 }

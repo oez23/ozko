@@ -3,7 +3,7 @@ export const tr = {
   brand: "Ozko Emlak",
   tagline: "Emlak ofisleri için portföy, müşteri ve eşleştirme",
   nav: {
-    main: "Ana menü", dashboard: "Genel Bakış", portfolio: "Portföy", contacts: "Müşteriler", team: "Ekip",
+    main: "Ana menü", dashboard: "Genel Bakış", matches: "Eşleşmeler", portfolio: "Portföy", contacts: "Müşteriler", team: "Ekip",
     settings: "Ayarlar", logout: "Çıkış yap",
   },
   common: {
@@ -103,6 +103,30 @@ export const tr = {
     minRooms: "En az oda", budget: "Bütçe {range}", roomsFrom: "en az {rooms} oda", pause: "Duraklat", activate: "Etkinleştir",
     paused: "Duraklatıldı – eşleştirme yapılmıyor.", noMatches: "Portföyde henüz uygun kayıt yok.",
     presentation: "Alıcı sunumu (PDF)",
+  },
+  matches: {
+    title: "Eşleşmeler", subtitle: "Alıcı talepleriniz için uygun portföyler", newCount: "{count} yeni",
+    markSeen: "Tümünü görüldü işaretle", empty: "Şu an eşleşme yok",
+    emptyHint: "Müşterilerinize alıcı talebi ekleyin; uygun portföyler burada görünür.",
+    isNew: "Yeni", network: "Ağ · {office}", dismiss: "Uygun değil", forCustomer: "{name} için",
+  },
+  network: {
+    title: "Ağ portföyü", notice: "Bu portföy başka bir ofise aittir. Görüşme ve iş birliği için danışmanla iletişime geçin.",
+    contact: "Portföy danışmanı", office: "Ofis", noPhone: "Telefon paylaşılmamış",
+    shareProperty: "Ofisler arası ağda paylaş",
+    sharePropertyHint: "Diğer ofislerin danışmanları bu portföyü alıcıları için görebilir. Adres ve mal sahibi asla paylaşılmaz.",
+    shareRequest: "Talebi ağda anonim paylaş",
+    shareRequestHint: "Uygun portföyü olan diğer ofisler yalnızca adınızı ve telefonunuzu görür; müşteri bilgisi paylaşılmaz.",
+    buyerAt: "Ağ: {agent} · {office}",
+  },
+  share: {
+    create: "Bağlantı ile gönder", creating: "Oluşturuluyor…", created: "Bağlantı hazır. Yalnızca şimdi gösterilir, kopyalayın:",
+    whatsapp: "WhatsApp ile gönder", message: "Merhaba, sizin için seçtiğim portföyler: {url}",
+    listTitle: "Gönderilen bağlantılar", listItem: "{date} · {count} portföy · {views} görüntülenme",
+    lastViewed: "son görüntülenme {date}", neverViewed: "henüz açılmadı", revoke: "İptal et",
+    networkExcluded: "Ağ portföyleri bağlantıya eklenmez.",
+    pageTitle: "Sizin için seçilen portföyler", pageLead: "{agent} tarafından hazırlandı", empty: "Bu bağlantıdaki portföyler artık yayında değil.",
+    invalid: "Bu bağlantı geçersiz veya süresi dolmuş.", contactAgent: "Danışmanınız", call: "Ara",
   },
   team: { title: "Ekip", since: "{date} tarihinden beri" },
   settings: {

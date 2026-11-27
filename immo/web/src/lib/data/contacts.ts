@@ -95,6 +95,7 @@ export async function createBuyerRequest(session: Session, input: BuyerRequestIn
       maxAreaSqm: input.maxAreaSqm ?? null,
       minRooms: input.minRooms ?? null,
       notes: input.notes ?? null,
+      sharedWithNetwork: input.sharedWithNetwork,
     })
     .returning({ id: buyerRequests.id });
   await audit(session, "create", "buyer_request", created!.id);

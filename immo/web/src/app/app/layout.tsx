@@ -2,12 +2,15 @@ import Link from "next/link";
 import { logout } from "@/app/actions/auth";
 import { getI18n } from "@/i18n/server";
 import { requireSession } from "@/lib/auth";
+import { listMatchInbox } from "@/lib/data/matching";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const session = await requireSession();
   const { m } = await getI18n();
-  const nav = [
+  const newMatches = (await listMatchInbox(session)).filter((match) => match.isNew).length;
+  const nav: { href: string; label: string; badge?: number }[] = [
     { href: "/app", label: m.nav.dashboard },
+    { href: "/app/matches", label: m.nav.matches, badge: newMatches },
     { href: "/app/portfolio", label: m.nav.portfolio },
     { href: "/app/contacts", label: m.nav.contacts },
     { href: "/app/team", label: m.nav.team },
@@ -24,8 +27,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <nav aria-label={m.nav.main} className="flex gap-1 overflow-x-auto md:mt-6 md:flex-col">
             {nav.map((item) => (
               <Link key={item.href} href={item.href}
-                className="rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap text-ink hover:bg-brand-soft">
+                className="flex items-center justify-between gap-2 rounded-md px-3 py-2 text-sm font-medium whitespace-nowrap text-ink hover:bg-brand-soft">
                 {item.label}
+                {item.badge ? (
+                  <span className="rounded-full bg-brand px-1.5 text-xs font-semibold text-white tabular-nums">{item.badge}</span>
+                ) : null}
               </Link>
             ))}
             <form action={logout} className="md:hidden">

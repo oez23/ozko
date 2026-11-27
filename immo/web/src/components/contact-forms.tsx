@@ -100,6 +100,13 @@ export function BuyerRequestForm({ contactId }: { contactId: string }) {
           <Input name="minRooms" defaultValue={v.minRooms} type="number" inputMode="decimal" min={0} step="0.5" error={e.minRooms} />
         </Field>
       </div>
+      <label className="flex items-start gap-3 text-sm">
+        <input type="checkbox" name="sharedWithNetwork" defaultChecked={v.sharedWithNetwork === "on"} className="mt-0.5 size-4 accent-brand" />
+        <span>
+          <span className="font-medium">{m.network.shareRequest}</span>
+          <span className="mt-1 block text-xs text-muted">{m.network.shareRequestHint}</span>
+        </span>
+      </label>
       <div><Button type="submit" disabled={pending}>{pending ? m.common.saving : r.submit}</Button></div>
     </form>
   );

@@ -4,7 +4,7 @@ export const de: Messages = {
   brand: "Ozko Emlak",
   tagline: "Portfolio, Kunden und Matching für Immobilienbüros",
   nav: {
-    main: "Hauptnavigation", dashboard: "Übersicht", portfolio: "Portfolio", contacts: "Kunden", team: "Team",
+    main: "Hauptnavigation", dashboard: "Übersicht", matches: "Treffer", portfolio: "Portfolio", contacts: "Kunden", team: "Team",
     settings: "Einstellungen", logout: "Abmelden",
   },
   common: {
@@ -104,6 +104,30 @@ export const de: Messages = {
     minRooms: "Zimmer ab", budget: "Budget {range}", roomsFrom: "ab {rooms} Zimmer", pause: "Pausieren", activate: "Aktivieren",
     paused: "Pausiert – kein Matching.", noMatches: "Noch kein passendes Objekt im Portfolio.",
     presentation: "Käuferpräsentation (PDF)",
+  },
+  matches: {
+    title: "Treffer", subtitle: "Passende Objekte für Ihre Suchaufträge", newCount: "{count} neu",
+    markSeen: "Alle als gesehen markieren", empty: "Aktuell keine Treffer",
+    emptyHint: "Legen Sie bei Ihren Kunden Suchaufträge an; passende Objekte erscheinen hier.",
+    isNew: "Neu", network: "Netzwerk · {office}", dismiss: "Passt nicht", forCustomer: "Für {name}",
+  },
+  network: {
+    title: "Netzwerk-Objekt", notice: "Dieses Objekt gehört einem anderen Büro. Für Besichtigung und Zusammenarbeit den Makler kontaktieren.",
+    contact: "Zuständiger Makler", office: "Büro", noPhone: "Keine Telefonnummer hinterlegt",
+    shareProperty: "Im büroübergreifenden Netzwerk teilen",
+    sharePropertyHint: "Makler anderer Büros sehen dieses Objekt für ihre Käufer. Adresse und Eigentümer werden nie geteilt.",
+    shareRequest: "Suchauftrag anonym im Netzwerk teilen",
+    shareRequestHint: "Andere Büros mit passendem Objekt sehen nur Ihren Namen und Ihre Telefonnummer, keine Kundendaten.",
+    buyerAt: "Netzwerk: {agent} · {office}",
+  },
+  share: {
+    create: "Als Link senden", creating: "Wird erstellt…", created: "Link ist fertig. Er wird nur jetzt angezeigt, bitte kopieren:",
+    whatsapp: "Per WhatsApp senden", message: "Guten Tag, diese Objekte habe ich für Sie ausgewählt: {url}",
+    listTitle: "Gesendete Links", listItem: "{date} · {count} Objekte · {views} Aufrufe",
+    lastViewed: "zuletzt geöffnet {date}", neverViewed: "noch nicht geöffnet", revoke: "Widerrufen",
+    networkExcluded: "Netzwerk-Objekte werden nicht in den Link aufgenommen.",
+    pageTitle: "Für Sie ausgewählte Objekte", pageLead: "Zusammengestellt von {agent}", empty: "Die Objekte dieses Links sind nicht mehr verfügbar.",
+    invalid: "Dieser Link ist ungültig oder abgelaufen.", contactAgent: "Ihr Makler", call: "Anrufen",
   },
   team: { title: "Team", since: "seit {date}" },
   settings: {

@@ -1,11 +1,15 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { eq, sql } from "drizzle-orm";
-import type { PropertyInput, Role } from "@immo/core";
+import type { BuyerRequestInput, PropertyInput, Role } from "@immo/core";
 import { db, pool } from "@/db/client";
-import { auditLog, buyerRequests, memberships, organizations, users } from "@/db/schema";
+import { auditLog, buyerRequests, memberships, organizations, properties, shares, users } from "@/db/schema";
 import type { Session } from "@/lib/auth";
 import { createBuyerRequest, createContact, getContact, listContacts, setBuyerRequestActive } from "@/lib/data/contacts";
-import { matchPropertiesForRequest, matchRequestsForProperty } from "@/lib/data/matching";
+import {
+  dismissMatch, getNetworkProperty, listMatchInbox, markMatchesSeen, matchPropertiesForRequest, matchRequestsForProperty,
+  PUBLIC_PROPERTY_COLUMNS,
+} from "@/lib/data/matching";
+import { createShare, listSharesForContact, resolveShare, revokeShare } from "@/lib/data/shares";
 import {
   createProperty, getComparables, getPriceHistory, getPropertiesByIds, getProperty, importProperties, listProperties, updateProperty, valueProperty,
 } from "@/lib/data/properties";
@@ -25,7 +29,13 @@ async function org(name: string) {
 
 const flat = (patch: Partial<PropertyInput> = {}): PropertyInput => ({
   title: "Wohnung am Park", dealType: "sale", propertyType: "apartment", status: "active",
-  price: 300_000, currency: "EUR", city: "Berlin", district: "Mitte", areaSqm: 100, rooms: 3, ...patch,
+  price: 300_000, currency: "EUR", city: "Berlin", district: "Mitte", areaSqm: 100, rooms: 3,
+  sharedWithNetwork: false, ...patch,
+});
+
+const wish = (contactId: string, patch: Partial<BuyerRequestInput> = {}): BuyerRequestInput => ({
+  contactId, dealType: "sale", propertyTypes: ["apartment"], city: "Berlin", districts: [], currency: "EUR",
+  sharedWithNetwork: false, ...patch,
 });
 
 let owner: Session, agentA: Session, agentB: Session, outsider: Session;
@@ -56,9 +66,7 @@ describe("tenant isolation", () => {
     await expect(getContact(outsider, contactId)).rejects.toBeInstanceOf(NotFoundError);
     await expect(createProperty(outsider, flat({ ownerContactId: contactId }))).rejects.toBeInstanceOf(NotFoundError);
     await expect(
-      createBuyerRequest(outsider, {
-        contactId, dealType: "sale", propertyTypes: ["apartment"], city: "Berlin", districts: [], currency: "EUR",
-      }),
+      createBuyerRequest(outsider, wish(contactId)),
     ).rejects.toBeInstanceOf(NotFoundError);
   });
 });
@@ -100,10 +108,9 @@ describe("matching", () => {
   it("matches both directions and hides a colleague's customer identity", async () => {
     const propertyId = await createProperty(agentB, flat({ title: "Match-Objekt", city: "İzmir", district: "Karşıyaka" }));
     const contactId = await createContact(agentA, { fullName: "Ayşe Yılmaz", kind: "buyer" });
-    const requestId = await createBuyerRequest(agentA, {
-      contactId, dealType: "sale", propertyTypes: ["apartment"], city: "izmir", districts: ["Karsiyaka"],
-      currency: "EUR", maxPrice: 320_000, minRooms: 3,
-    });
+    const requestId = await createBuyerRequest(
+      agentA, wish(contactId, { city: "izmir", districts: ["Karsiyaka"], maxPrice: 320_000, minRooms: 3 }),
+    );
     const { property } = await getProperty(agentB, propertyId);
 
     const seenByColleague = await matchRequestsForProperty(agentB, property);
@@ -123,11 +130,137 @@ describe("matching", () => {
     await createProperty(outsider, flat({ title: "Fremdes Objekt", city: "Hamburg" }));
     const ownId = await createProperty(agentA, flat({ title: "Eigenes Objekt", city: "Hamburg" }));
     const contactId = await createContact(agentA, { fullName: "Hans Hamburg", kind: "buyer" });
-    const requestId = await createBuyerRequest(agentA, {
-      contactId, dealType: "sale", propertyTypes: ["apartment"], city: "Hamburg", districts: [], currency: "EUR",
-    });
+    const requestId = await createBuyerRequest(agentA, wish(contactId, { city: "Hamburg" }));
     const [request] = await db.select().from(buyerRequests).where(eq(buyerRequests.id, requestId));
     expect((await matchPropertiesForRequest(agentA, request!)).map((m) => m.property.id)).toEqual([ownId]);
+  });
+});
+
+const requestRow = async (id: string) => (await db.select().from(buyerRequests).where(eq(buyerRequests.id, id)))[0]!;
+const SECRET = { address: "Gizli Sokak 7", mandateEndsOn: "2030-01-01" } as const;
+
+describe("network matching across offices", () => {
+  it("shows another office's listing only after an explicit opt-in, and then only its public facts", async () => {
+    const ownerContact = await createContact(outsider, { fullName: "Mal Sahibi Mehmet", kind: "seller" });
+    const input = flat({ title: "Rakip ofis dairesi", city: "Antalya", ownerContactId: ownerContact, ...SECRET });
+    const propertyId = await createProperty(outsider, input);
+    const contactId = await createContact(agentA, { fullName: "Antalya Alıcısı", kind: "buyer" });
+    const request = await requestRow(await createBuyerRequest(agentA, wish(contactId, { city: "Antalya" })));
+
+    expect(await matchPropertiesForRequest(agentA, request)).toEqual([]);
+    await expect(getNetworkProperty(agentA, propertyId)).rejects.toBeInstanceOf(NotFoundError);
+
+    await updateProperty(outsider, propertyId, { ...input, sharedWithNetwork: true });
+    const [found] = await matchPropertiesForRequest(agentA, request);
+    expect(found?.network).toEqual({ orgName: "Rival GmbH", agentName: outsider.fullName, agentPhone: null });
+    expect(Object.keys(found!.property).sort()).toEqual(Object.keys(PUBLIC_PROPERTY_COLUMNS).sort());
+    const leaked = JSON.stringify([found, await getNetworkProperty(agentA, propertyId), await listMatchInbox(agentA)]);
+    for (const secret of ["Gizli Sokak", "2030-01-01", ownerContact, "Mal Sahibi", outsider.email, outsider.userId]) {
+      expect(leaked).not.toContain(secret);
+    }
+    // The full record, and editing, stay with the owning office.
+    await expect(getProperty(agentA, propertyId)).rejects.toBeInstanceOf(NotFoundError);
+    await expect(updateProperty(agentA, propertyId, input)).rejects.toBeInstanceOf(NotFoundError);
+
+    await updateProperty(outsider, propertyId, { ...input, sharedWithNetwork: true, status: "reserved" });
+    expect(await matchPropertiesForRequest(agentA, request)).toEqual([]);
+    await expect(getNetworkProperty(agentA, propertyId)).rejects.toBeInstanceOf(NotFoundError);
+  });
+
+  it("tells a listing's office that a foreign buyer exists only when both sides opted in, never who it is", async () => {
+    const contactId = await createContact(outsider, { fullName: "Gizli Alıcı Zeynep", kind: "buyer", phone: "+90 555 000 11 22" });
+    const privateId = await createProperty(agentA, flat({ title: "Paylaşılmayan", city: "Bursa" }));
+    const sharedId = await createProperty(agentA, flat({ title: "Paylaşılan", city: "Bursa", sharedWithNetwork: true }));
+    const shared = (await getProperty(agentA, sharedId)).property;
+    const unshared = (await getProperty(agentA, privateId)).property;
+
+    const hiddenRequest = await createBuyerRequest(outsider, wish(contactId, { city: "Bursa" }));
+    expect(await matchRequestsForProperty(agentA, shared)).toEqual([]);
+
+    const openRequest = await createBuyerRequest(outsider, wish(contactId, { city: "Bursa", sharedWithNetwork: true }));
+    const matches = await matchRequestsForProperty(agentA, shared);
+    expect(matches).toHaveLength(1);
+    expect(matches[0]).toMatchObject({
+      requestId: openRequest, contact: null,
+      network: { orgName: "Rival GmbH", agentName: outsider.fullName, agentPhone: null },
+    });
+    expect(JSON.stringify(matches)).not.toMatch(/Zeynep|555 000|Gizli/);
+    // An unshared listing gets no foreign buyers even though the request is open.
+    expect(await matchRequestsForProperty(agentA, unshared)).toEqual([]);
+    // Nobody from the listing's office can touch the foreign request.
+    await expect(setBuyerRequestActive(agentA, openRequest, false)).rejects.toBeInstanceOf(NotFoundError);
+    await expect(dismissMatch(agentA, openRequest, sharedId)).rejects.toBeInstanceOf(NotFoundError);
+    expect(hiddenRequest).not.toBe(openRequest);
+  });
+});
+
+describe("match inbox", () => {
+  it("lists matches for the user's own buyers, flags new ones and forgets dismissed ones", async () => {
+    const office = await org("Inbox Ofis");
+    const boss = await member(office, "Inbox Ofis", "owner");
+    const anna = await member(office, "Inbox Ofis", "agent");
+    const ben = await member(office, "Inbox Ofis", "agent");
+    const annasBuyer = await createContact(anna, { fullName: "Annas Käufer", kind: "buyer" });
+    const requestId = await createBuyerRequest(anna, wish(annasBuyer, { city: "Konya", maxPrice: 400_000 }));
+    const good = await createProperty(ben, flat({ title: "Passt", city: "Konya" }));
+    await createProperty(ben, flat({ title: "Zu teuer", city: "Konya", price: 900_000 }));
+    await createProperty(ben, flat({ title: "Falsche Stadt", city: "Adana" }));
+    await createProperty(ben, flat({ title: "Andere Währung", city: "Konya", currency: "TRY" }));
+    await createProperty(ben, flat({ title: "Reserviert", city: "Konya", status: "reserved" }));
+
+    const inbox = await listMatchInbox(anna);
+    expect(inbox.map((m) => [m.property.title, m.contact.fullName, m.isNew, m.network])).toEqual([["Passt", "Annas Käufer", true, null]]);
+    expect(await listMatchInbox(ben)).toEqual([]);
+    expect((await listMatchInbox(boss)).map((m) => m.property.title)).toEqual(["Passt"]);
+
+    await markMatchesSeen(anna);
+    expect((await listMatchInbox({ ...anna })).map((m) => m.isNew)).toEqual([false]);
+    // A price change makes the match new again.
+    await updateProperty(ben, good, flat({ title: "Passt", city: "Konya", price: 290_000 }));
+    expect((await listMatchInbox({ ...anna })).map((m) => m.isNew)).toEqual([true]);
+
+    await expect(dismissMatch(ben, requestId, good)).rejects.toBeInstanceOf(NotFoundError);
+    await dismissMatch(anna, requestId, good);
+    await dismissMatch(anna, requestId, good);
+    expect(await listMatchInbox({ ...anna })).toEqual([]);
+    expect(await matchPropertiesForRequest(anna, await requestRow(requestId))).toEqual([]);
+  });
+});
+
+describe("share links", () => {
+  it("serves only the sending office's public listing facts, counts views and dies on revoke or expiry", async () => {
+    const contactId = await createContact(agentA, { fullName: "Link Empfängerin", kind: "buyer", phone: "+90 555 999 88 77" });
+    const own = await createProperty(agentA, flat({ title: "Im Link", city: "Mersin", ...SECRET }));
+    const gone = await createProperty(agentA, flat({ title: "Zurückgezogen", city: "Mersin" }));
+    const foreign = await createProperty(outsider, flat({ title: "Fremdes Objekt im Link" }));
+
+    await expect(createShare(agentB, contactId, [own])).rejects.toBeInstanceOf(NotFoundError);
+    await expect(createShare(agentA, contactId, [foreign])).rejects.toBeInstanceOf(NotFoundError);
+    const token = await createShare(agentA, contactId, [gone, foreign, own]);
+    expect(await db.select().from(shares).where(eq(shares.tokenHash, token))).toEqual([]);
+
+    await updateProperty(agentA, gone, flat({ title: "Zurückgezogen", city: "Mersin", status: "withdrawn" }));
+    const page = await resolveShare(token);
+    expect(page?.properties.map((p) => p.title)).toEqual(["Im Link"]);
+    expect(page?.agent).toEqual({ fullName: agentA.fullName, phone: null, email: agentA.email });
+    expect(JSON.stringify(page)).not.toMatch(/Gizli Sokak|2030-01-01|Empfängerin|555 999|Fremdes/);
+    expect(await resolveShare(token.slice(0, -1) + (token.endsWith("A") ? "B" : "A"))).toBeNull();
+    expect(await resolveShare("")).toBeNull();
+
+    await resolveShare(token);
+    const [listed] = await listSharesForContact(agentA, contactId);
+    expect(listed).toMatchObject({ viewCount: 2, count: 2 });
+    await expect(listSharesForContact(agentB, contactId)).rejects.toBeInstanceOf(NotFoundError);
+    await expect(revokeShare(outsider, listed!.id)).rejects.toBeInstanceOf(NotFoundError);
+    await expect(revokeShare(agentB, listed!.id)).rejects.toBeInstanceOf(NotFoundError);
+
+    const expiring = await createShare(agentA, contactId, [own]);
+    await db.update(shares).set({ expiresAt: new Date(Date.now() - 1000) }).where(sql`${shares.viewCount} = 0`);
+    expect(await resolveShare(expiring)).toBeNull();
+
+    await revokeShare(owner, listed!.id);
+    expect(await resolveShare(token)).toBeNull();
+    expect((await db.select().from(properties).where(eq(properties.id, own)))[0]?.title).toBe("Im Link");
   });
 });
 

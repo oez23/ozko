@@ -30,6 +30,8 @@ export const users = pgTable(
     fullName: text("full_name").notNull(),
     phone: text("phone"),
     passwordHash: text("password_hash").notNull(),
+    /** Matches newer than this are flagged as new in the inbox. */
+    matchesSeenAt: timestamp("matches_seen_at", { withTimezone: true }).notNull().defaultNow(),
     createdAt: createdAt(),
   },
   (t) => [uniqueIndex("users_email_key").on(t.email)],
@@ -112,12 +114,14 @@ export const properties = pgTable(
     yearBuilt: integer("year_built"),
     description: text("description"),
     mandateEndsOn: date("mandate_ends_on"),
+    sharedWithNetwork: boolean("shared_with_network").notNull().default(false),
     createdAt: createdAt(),
     updatedAt: updatedAt(),
   },
   (t) => [
     index("properties_org_status_idx").on(t.orgId, t.status, t.createdAt),
     index("properties_org_match_idx").on(t.orgId, t.dealType, t.cityKey),
+    index("properties_network_idx").on(t.dealType, t.cityKey).where(sql`${t.sharedWithNetwork} and ${t.status} = 'active'`),
   ],
 );
 
@@ -153,10 +157,41 @@ export const buyerRequests = pgTable(
     maxAreaSqm: doublePrecision("max_area_sqm"),
     minRooms: doublePrecision("min_rooms"),
     notes: text("notes"),
+    sharedWithNetwork: boolean("shared_with_network").notNull().default(false),
     active: boolean("active").notNull().default(true),
     createdAt: createdAt(),
   },
   (t) => [index("buyer_requests_org_match_idx").on(t.orgId, t.active, t.dealType, t.cityKey)],
+);
+
+/** A buyer's agent ruled this listing out for this request; it no longer shows up as a match. */
+export const matchDismissals = pgTable(
+  "match_dismissals",
+  {
+    requestId: uuid("request_id").notNull().references(() => buyerRequests.id, { onDelete: "cascade" }),
+    propertyId: uuid("property_id").notNull().references(() => properties.id, { onDelete: "cascade" }),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "set null" }),
+    createdAt: createdAt(),
+  },
+  (t) => [primaryKey({ columns: [t.requestId, t.propertyId] })],
+);
+
+/** A public, unguessable link to a set of listings sent to a customer. Only the token hash is stored. */
+export const shares = pgTable(
+  "shares",
+  {
+    id: id(),
+    orgId: uuid("org_id").notNull().references(() => organizations.id, { onDelete: "cascade" }),
+    agentId: uuid("agent_id").notNull().references(() => users.id),
+    contactId: uuid("contact_id").references(() => contacts.id, { onDelete: "cascade" }),
+    tokenHash: text("token_hash").notNull(),
+    propertyIds: uuid("property_ids").array().notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+    viewCount: integer("view_count").notNull().default(0),
+    lastViewedAt: timestamp("last_viewed_at", { withTimezone: true }),
+    createdAt: createdAt(),
+  },
+  (t) => [uniqueIndex("shares_token_key").on(t.tokenHash), index("shares_contact_idx").on(t.orgId, t.contactId)],
 );
 
 export const auditLog = pgTable(
